@@ -102,7 +102,7 @@ model Company {
   name            String
   mail            String             @unique
   passwordHash    String
-  country         String
+  pais            String
   razonSocial     String
   rut_Cuit        String             @unique
   rubroPrincipal  String
@@ -121,9 +121,9 @@ model Company {
 
 model CompanySettings {
   companyId         String  @id
-  lowStockThreshold Int     @default(5)
+  bajoStock         Int     @default(5)
   invoicePrefix     String  @default("S-")
-  themePrimaryColor String?
+  tema              String?
 
   company           Company @relation(fields: [companyId], references: [id])
 }
