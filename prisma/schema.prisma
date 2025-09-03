@@ -1,0 +1,191 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/* ================================
+   Core / Usuarios / Autenticación
+================================ */
+model User {
+  id                 String              @id @default(uuid())
+  name               String
+  email              String              @unique
+  passwordHash       String
+  avatarUrl          String?
+  isActive           Boolean             @default(true)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @default(now()) @updatedAt
+  oauth              OAuthAccount[]
+  sessions           Session[]
+  companies          UserCompany[]
+  passwordReset      PasswordReset[]
+  emailVerification  EmailVerification[]
+}
+
+model Session {
+  id               String   @id @default(cuid())
+  userId           String
+  refreshTokenHash String
+  userAgent        String?
+  ip               String?
+  createdAt        DateTime @default(now())
+  expiresAt        DateTime
+  user             User     @relation(fields: [userId], references: [id])
+}
+
+model PasswordReset {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model EmailVerification {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model OAuthAccount {
+  id             String        @id @default(cuid())
+  userId         String
+  provider       OAuthProvider
+  providerUserId String
+  accessToken    String?
+  refreshToken   String?
+  user           User          @relation(fields: [userId], references: [id])
+
+  @@unique([provider, providerUserId])
+}
+
+/* ================================
+   Roles y enums
+================================ */
+enum Role {
+  PROPIETARIO
+  EMPLEADO
+  ADMIN
+}
+
+enum Currency {
+  USD
+  UYU
+  ARS
+  BRL
+  EUR
+}
+
+enum OAuthProvider {
+  GOOGLE
+  GITHUB
+}
+
+/* ================================
+   Company / Configuración
+================================ */
+model Company {
+  id              String           @id @default(uuid())
+  name            String
+  logoFileId      String?
+  currency        Currency         @default(USD)
+  locale          String           @default("es-UY")
+  timezone        String           @default("America/Montevideo")
+  createdAt       DateTime         @default(now())
+  settings        CompanySettings?
+  members         UserCompany[]
+  categories      Category[]
+  products        Product[]
+  stockMovements  StockMovement[]  @relation("StockMovementToCompany")
+
+  @@unique([name])
+}
+
+model CompanySettings {
+  companyId         String  @id
+  lowStockThreshold Int     @default(5)
+  invoicePrefix     String  @default("S-")
+  themePrimaryColor String?
+  company           Company @relation(fields: [companyId], references: [id])
+}
+
+model UserCompany {
+  id        String  @id @default(uuid())
+  userId    String
+  companyId String
+  role      Role
+  company   Company @relation(fields: [companyId], references: [id])
+  user      User    @relation(fields: [userId], references: [id])
+
+  @@unique([userId, companyId])
+}
+
+/* ================================
+   Productos / Inventario
+================================ */
+model Category {
+  id        String    @id @default(uuid())
+  companyId String
+  name      String
+  company   Company   @relation(fields: [companyId], references: [id])
+  products  Product[]
+
+  @@unique([companyId, name]) // nombre único por empresa
+}
+
+model Product {
+  id             String           @id @default(uuid())
+  companyId      String
+  name           String
+  sku            String
+  barcode        String?
+  description    String?
+  price          Float
+  cost           Float?
+  categoryId     String?
+  imageFileId    String?          @unique
+  imageFile      File?            @relation("ProductImage", fields: [imageFileId], references: [id])
+  stockMovements StockMovement[]  @relation("StockMovementToProduct")
+  company        Company          @relation(fields: [companyId], references: [id])
+  category       Category?        @relation(fields: [categoryId], references: [id])
+
+  @@unique([companyId, sku])
+}
+
+model File {
+  id        String   @id @default(uuid())
+  name      String
+  mimeType  String
+  url       String
+  createdAt DateTime @default(now())
+  product   Product? @relation("ProductImage")
+}
+
+enum StockMovementType {
+  ENTRADA
+  SALIDA
+  AJUSTE
+}
+
+model StockMovement {
+  id        String            @id @default(uuid())
+  companyId String
+  productId String
+  type      StockMovementType
+  qty       Int
+  reason    String?
+  refType   String?
+  refId     String?
+  createdAt DateTime          @default(now())
+
+  company   Company  @relation("StockMovementToCompany", fields: [companyId], references: [id])
+  product   Product  @relation("StockMovementToProduct", fields: [productId], references: [id])
+}

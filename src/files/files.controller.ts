@@ -1,0 +1,94 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable prettier/prettier */
+import {
+    Controller,
+    Post,
+    Param,
+    UploadedFile,
+    UseInterceptors,
+    ParseUUIDPipe,
+    BadRequestException,
+    UseGuards,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ParseFilePipe, MaxFileSizeValidator, FileTypeValidator } from '@nestjs/common';
+import { FilesService } from './files.service';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+
+@ApiTags('Files')
+@Controller('files')
+@UseGuards(JwtAuthGuard)
+export class FilesController {
+    constructor(private readonly filesService: FilesService) {}
+
+    @ApiBearerAuth()
+    @Post('uploadImage/:id')
+    @UseInterceptors(FileInterceptor('image'))
+    async uploadProductImage(
+        @Param('id', ParseUUIDPipe) id: string,
+        @UploadedFile(
+        new ParseFilePipe({
+            validators: [
+            new MaxFileSizeValidator({ maxSize: 200_000 }),
+            new FileTypeValidator({ fileType: 'image/(jpeg|png|webp)' }),
+            ],
+            fileIsRequired: true,
+        }),
+        )
+        file: Express.Multer.File,
+    ) {
+        const result = await this.filesService.uploadProductImage(id, file);
+        return {
+        message: 'Imagen subida correctamente',
+        ...result,
+        };
+    }
+
+    @ApiBearerAuth()
+    @Post('uploadAvatar/:userId')
+    @UseInterceptors(FileInterceptor('avatar'))
+    async uploadUserAvatar(
+        @Param('userId', ParseUUIDPipe) userId: string,
+        @UploadedFile(
+        new ParseFilePipe({
+            validators: [
+            new MaxFileSizeValidator({ maxSize: 200_000 }),
+            new FileTypeValidator({ fileType: 'image/(jpeg|png|webp)' }),
+            ],
+            fileIsRequired: true,
+        }),
+        )
+        file: Express.Multer.File,
+    ) {
+        const result = await this.filesService.uploadUserAvatar(userId, file);
+        return {
+        message: 'Avatar subido correctamente',
+        ...result,
+        };
+    }
+
+    @ApiBearerAuth()
+    @Post('uploadLogo/:companyId')
+    @UseInterceptors(FileInterceptor('logo'))
+    async uploadCompanyLogo(
+        @Param('companyId', ParseUUIDPipe) companyId: string,
+        @UploadedFile(
+        new ParseFilePipe({
+            validators: [
+            new MaxFileSizeValidator({ maxSize: 200_000 }),
+            new FileTypeValidator({ fileType: 'image/(jpeg|png|webp)' }),
+            ],
+            fileIsRequired: true,
+        }),
+        )
+        file: Express.Multer.File,
+    ) {
+        const result = await this.filesService.uploadCompanyLogo(companyId, file);
+        return {
+        message: 'Logo subido correctamente',
+        ...result,
+        };
+    }
+}
+
