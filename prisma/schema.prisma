@@ -86,25 +86,35 @@ enum Currency {
 
 enum OAuthProvider {
   GOOGLE
-  GITHUB
+}
+
+enum FacturaStatus  {
+  PAGADA
+  POR_PAGAR
+  VENCIDA
 }
 
 /* ================================
    Company / Configuración
 ================================ */
 model Company {
-  id              String           @id @default(uuid())
+  id              String             @id @default(uuid())
   name            String
+  mail            String             @unique
+  passwordHash    String
+  country         String
+  razonSocial     String
+  rut_Cuit        String             @unique
+  rubroPrincipal  String
   logoFileId      String?
-  currency        Currency         @default(USD)
-  locale          String           @default("es-UY")
-  timezone        String           @default("America/Montevideo")
-  createdAt       DateTime         @default(now())
+  createdAt       DateTime           @default(now())
+  
   settings        CompanySettings?
   members         UserCompany[]
   categories      Category[]
   products        Product[]
-  stockMovements  StockMovement[]  @relation("StockMovementToCompany")
+  stockMovements  MovimientosStock[] @relation("StockMovementToCompany")
+  proveedores     CompanyProveedor[]
 
   @@unique([name])
 }
@@ -114,6 +124,7 @@ model CompanySettings {
   lowStockThreshold Int     @default(5)
   invoicePrefix     String  @default("S-")
   themePrimaryColor String?
+
   company           Company @relation(fields: [companyId], references: [id])
 }
 
@@ -122,10 +133,40 @@ model UserCompany {
   userId    String
   companyId String
   role      Role
+
   company   Company @relation(fields: [companyId], references: [id])
   user      User    @relation(fields: [userId], references: [id])
 
   @@unique([userId, companyId])
+}
+
+/* ================================
+   Proveedores
+================================ */
+model Proveedor {
+  id             String             @id @default(uuid())
+  nombre         String
+  cif            String             @unique
+  telefono       String?
+  email          String?
+  nombreContacto String?
+  direccion      String?
+  lat            Float?
+  lng            Float?
+  moneda         String
+
+  companies      CompanyProveedor[]
+}
+
+model CompanyProveedor {
+  id          String     @id @default(uuid())
+  companyId   String
+  proveedorId String
+
+  company     Company    @relation(fields: [companyId], references: [id])
+  proveedor   Proveedor  @relation(fields: [proveedorId], references: [id])
+
+  @@unique([companyId, proveedorId])
 }
 
 /* ================================
@@ -136,13 +177,14 @@ model Category {
   companyId String
   name      String
   company   Company   @relation(fields: [companyId], references: [id])
+  
   products  Product[]
 
   @@unique([companyId, name]) // nombre único por empresa
 }
 
 model Product {
-  id             String           @id @default(uuid())
+  id             String             @id @default(uuid())
   companyId      String
   name           String
   sku            String
@@ -151,11 +193,12 @@ model Product {
   price          Float
   cost           Float?
   categoryId     String?
-  imageFileId    String?          @unique
-  imageFile      File?            @relation("ProductImage", fields: [imageFileId], references: [id])
-  stockMovements StockMovement[]  @relation("StockMovementToProduct")
-  company        Company          @relation(fields: [companyId], references: [id])
-  category       Category?        @relation(fields: [categoryId], references: [id])
+  imageFileId    String?            @unique
+
+  imageFile      File?              @relation("ProductImage", fields: [imageFileId], references: [id])
+  stockMovements MovimientosStock[] @relation("StockMovementToProduct")
+  company        Company            @relation(fields: [companyId], references: [id])
+  category       Category?          @relation(fields: [categoryId], references: [id])
 
   @@unique([companyId, sku])
 }
@@ -166,6 +209,7 @@ model File {
   mimeType  String
   url       String
   createdAt DateTime @default(now())
+
   product   Product? @relation("ProductImage")
 }
 
@@ -175,7 +219,7 @@ enum StockMovementType {
   AJUSTE
 }
 
-model StockMovement {
+model MovimientosStock {
   id        String            @id @default(uuid())
   companyId String
   productId String
