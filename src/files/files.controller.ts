@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable prettier/prettier */
 import {
     Controller,
     Post,
@@ -7,18 +5,14 @@ import {
     UploadedFile,
     UseInterceptors,
     ParseUUIDPipe,
-    BadRequestException,
-    UseGuards,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ParseFilePipe, MaxFileSizeValidator, FileTypeValidator } from '@nestjs/common';
 import { FilesService } from './files.service';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('Files')
 @Controller('files')
-@UseGuards(JwtAuthGuard)
 export class FilesController {
     constructor(private readonly filesService: FilesService) {}
 
