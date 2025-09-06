@@ -14,7 +14,7 @@ export class CreateCompanyDto {
     @ApiProperty({ example: 'hashed_password_123', description: 'Hash de la contraseña del administrador' })
     @IsString()
     @IsNotEmpty()
-    passwordHash: string;
+    password: string;
 
     @ApiProperty({ example: 'Uruguay', description: 'País de la empresa' })
     @IsString()
