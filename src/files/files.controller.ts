@@ -62,27 +62,31 @@ export class FilesController {
         };
     }
 
-    @ApiBearerAuth()
-    @Post('uploadLogo/:companyId')
-    @UseInterceptors(FileInterceptor('logo'))
-    async uploadCompanyLogo(
-        @Param('companyId', ParseUUIDPipe) companyId: string,
-        @UploadedFile(
-        new ParseFilePipe({
-            validators: [
-            new MaxFileSizeValidator({ maxSize: 200_000 }),
-            new FileTypeValidator({ fileType: 'image/(jpeg|png|webp)' }),
-            ],
-            fileIsRequired: true,
-        }),
-        )
-        file: Express.Multer.File,
-    ) {
-        const result = await this.filesService.uploadCompanyLogo(companyId, file);
-        return {
-        message: 'Logo subido correctamente',
-        ...result,
-        };
-    }
+    // ------------------
+    // YA ESTA IMPLEMENTADA EN POST /companies/:companyId/logo
+    // ----------------------
+    
+    // @ApiBearerAuth()
+    // @Post('uploadLogo/:companyId')
+    // @UseInterceptors(FileInterceptor('logo'))
+    // async uploadCompanyLogo(
+    //     @Param('companyId', ParseUUIDPipe) companyId: string,
+    //     @UploadedFile(
+    //     new ParseFilePipe({
+    //         validators: [
+    //         new MaxFileSizeValidator({ maxSize: 200_000 }),
+    //         new FileTypeValidator({ fileType: 'image/(jpeg|png|webp)' }),
+    //         ],
+    //         fileIsRequired: true,
+    //     }),
+    //     )
+    //     file: Express.Multer.File,
+    // ) {
+    //     const result = await this.filesService.uploadCompanyLogo(companyId, file);
+    //     return {
+    //     message: 'Logo subido correctamente',
+    //     ...result,
+    //     };
+    // }
 }
 
