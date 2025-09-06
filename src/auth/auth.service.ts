@@ -54,7 +54,7 @@ export class AuthService {
         const user = await this.prisma.user.findUnique({ where: { email: dto.email } });
         if (user) throw new ForbiddenException('Usuario ya existe');
 
-        const passwordHash = await bcrypt.hash(dto.passwordHash, 10);
+        const passwordHash = await bcrypt.hash(dto.password, 10);
         const newUser = await this.prisma.user.create({ data: { ...dto, passwordHash } });
         
         // Generar token para el nuevo usuario
