@@ -50,40 +50,46 @@ export class AuthService {
     }
 
     async signUp(dto: SignupDto, res: Response) {
-
+        // Verificar si ya existe el usuario
         const user = await this.prisma.user.findUnique({ where: { email: dto.email } });
         if (user) throw new ForbiddenException('Usuario ya existe');
 
+        // Encriptar la contraseña
         const passwordHash = await bcrypt.hash(dto.password, 10);
-        const newUser = await this.prisma.user.create({ data: { ...dto, passwordHash } });
-        
-        // Generar token para el nuevo usuario
-        const payload = {
-            id: newUser.id,
-            name: newUser.name,
-            email: newUser.email,
-        };
 
+        // Crear usuario (NO pasamos dto completo porque incluye `password`)
+        const newUser = await this.prisma.user.create({
+            data: {
+            name: dto.name,
+            email: dto.email,
+            passwordHash,
+            avatarUrl: dto.avatarUrl,
+            },
+        });
+
+        // Generar token
+        const payload = { id: newUser.id, name: newUser.name, email: newUser.email };
         const token = this.jwtService.sign(payload, {
             secret: process.env.JWT_SECRET,
             expiresIn: '15m',
         });
 
-        // Establecer cookie HTTP-only con el token
+        // Guardar token en cookie HTTP-only
         res.cookie('auth-token', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'strict',
-            maxAge: 15 * 60 * 1000, // 15 minutos
+            maxAge: 15 * 60 * 1000,
         });
 
         return {
             user: {
-                id: newUser.id,
-                name: newUser.name,
-                email: newUser.email,
-                avatarUrl: newUser.avatarUrl,
-            }
+            id: newUser.id,
+            name: newUser.name,
+            email: newUser.email,
+            avatarUrl: newUser.avatarUrl,
+            createdAt: newUser.createdAt,
+            },
         };
     }
 
