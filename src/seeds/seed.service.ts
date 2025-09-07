@@ -1,6 +1,8 @@
+// src/seeds/seed.service.ts
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import { seedUsers } from './user.seed';
+import { UserSeed } from './user.seed';
+import { CompanySeed } from './company.seed';
 
 @Injectable()
 export class SeedService implements OnModuleInit {
@@ -11,8 +13,10 @@ export class SeedService implements OnModuleInit {
   }
 
   private async runSeeds() {
-    await seedUsers(this.prisma);
-    // en el futuro: await seedCompanies(this.prisma), etc.
+    const userSeed = new UserSeed(this.prisma);
+    await userSeed.run();
+    const companySeed = new CompanySeed(this.prisma);
+    await companySeed.run();
   }
 }
 
