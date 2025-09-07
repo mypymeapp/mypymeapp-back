@@ -5,12 +5,17 @@ import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { PrismaModule } from '../prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
+import { SeedService } from './seeds/seed.service';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    UsersModule, PrismaModule, AuthModule],
+    UsersModule,
+    PrismaModule,
+    AuthModule,
+  ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, SeedService],
 })
 export class AppModule {}
+
