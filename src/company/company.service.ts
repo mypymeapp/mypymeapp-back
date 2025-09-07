@@ -2,6 +2,7 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import { PrismaService } from '../../prisma/prisma.service';
 import { Role } from '@prisma/client';
 import { FilesService } from '../files/files.service';
+import * as bcrypt from 'bcrypt'; 
 
 @Injectable()
     export class CompanyService {
@@ -13,42 +14,51 @@ import { FilesService } from '../files/files.service';
     async createCompany(data: {
         name: string;
         mail: string;
-        password: string;
+        password: string; // recibe password plano desde el DTO
         pais: string;
         razonSocial: string;
         rut_Cuit: string;
         rubroPrincipal: string;
     }) {
+        // verificar que no exista una empresa con mismo mail o RUT/CUIT
         const existing = await this.prisma.company.findFirst({
             where: {
                 OR: [{ mail: data.mail }, { rut_Cuit: data.rut_Cuit }],
             },
         });
-        if (existing) { throw new ConflictException( 'Ya existe una empresa con ese mail o RUT/CUIT' ); }
+        if (existing) {
+        throw new ConflictException('Ya existe una empresa con ese mail o RUT/CUIT');
+        }
 
+        // hash de la contraseña antes de guardar
+        const hashedPassword = await bcrypt.hash(data.password, 10);
+
+        // crear empresa con password hasheado
         return this.prisma.company.create({
-            data: {
-                name: data.name,
-                mail: data.mail,
-                passwordHash: data.password,
-                pais: data.pais,
-                razonSocial: data.razonSocial,
-                rut_Cuit: data.rut_Cuit,
-                rubroPrincipal: data.rubroPrincipal,
-                settings: { create: {} },
-            },
-            select: {
-                id: true,
-                name: true,
-                mail: true,
-                pais: true,
-                razonSocial: true,
-                rut_Cuit: true,
-                rubroPrincipal: true,
-                logoFileId: true,
-                createdAt: true,
-            },
-            });
+        data: {
+            name: data.name,
+            mail: data.mail,
+            passwordHash: hashedPassword,
+            pais: data.pais,
+            razonSocial: data.razonSocial,
+            rut_Cuit: data.rut_Cuit,
+            rubroPrincipal: data.rubroPrincipal,
+            settings: { create: {} }, // relación anidada
+        },
+        // excluimos passwordHash de la respuesta
+        select: {
+            id: true,
+            name: true,
+            mail: true,
+            pais: true,
+            razonSocial: true,
+            rut_Cuit: true,
+            rubroPrincipal: true,
+            logoFileId: true,
+            createdAt: true,
+            settings: true,
+        },
+        });
     }
 
     async getCompanies() {
