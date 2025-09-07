@@ -13,7 +13,7 @@ import { FilesService } from '../files/files.service';
     async createCompany(data: {
         name: string;
         mail: string;
-        passwordHash: string;
+        password: string;
         pais: string;
         razonSocial: string;
         rut_Cuit: string;
@@ -30,46 +30,100 @@ import { FilesService } from '../files/files.service';
             data: {
                 name: data.name,
                 mail: data.mail,
-                passwordHash: data.passwordHash,
+                passwordHash: data.password,
                 pais: data.pais,
                 razonSocial: data.razonSocial,
                 rut_Cuit: data.rut_Cuit,
                 rubroPrincipal: data.rubroPrincipal,
-                settings: { create: {} }, // nested relation
+                settings: { create: {} },
             },
-        });
+            select: {
+                id: true,
+                name: true,
+                mail: true,
+                pais: true,
+                razonSocial: true,
+                rut_Cuit: true,
+                rubroPrincipal: true,
+                logoFileId: true,
+                createdAt: true,
+            },
+            });
     }
 
     async getCompanies() {
-            return this.prisma.company.findMany({
-            include: { settings: true, members: true },
+        return this.prisma.company.findMany({
+            select: {
+                id: true,
+                name: true,
+                mail: true,
+                pais: true,
+                razonSocial: true,
+                rut_Cuit: true,
+                rubroPrincipal: true,
+                logoFileId: true,
+                createdAt: true,
+                settings: true,
+                members: true,
+            },
         });
     }
 
     async getCompanyById(id: string) {
         const company = await this.prisma.company.findUnique({
             where: { id },
-            include: { settings: true, members: true },
+            select: {
+                id: true,
+                name: true,
+                mail: true,
+                pais: true,
+                razonSocial: true,
+                rut_Cuit: true,
+                rubroPrincipal: true,
+                logoFileId: true,
+                createdAt: true,
+                settings: true,
+                members: true,
+            },
         });
         if (!company) throw new NotFoundException('Empresa no encontrada');
         return company;
     }
 
-    async updateCompany(id: string, data: any) {
+
+    async updateCompany(id: string, data: Partial<any>) {
         const company = await this.prisma.company.findUnique({ where: { id } });
         if (!company) throw new NotFoundException('Empresa no encontrada');
 
         return this.prisma.company.update({
             where: { id },
             data,
+            select: {
+                id: true,
+                name: true,
+                mail: true,
+                pais: true,
+                razonSocial: true,
+                rut_Cuit: true,
+                rubroPrincipal: true,
+                logoFileId: true,
+                createdAt: true,
+            },
         });
     }
+
 
     async deleteCompany(id: string) {
         const company = await this.prisma.company.findUnique({ where: { id } });
         if (!company) throw new NotFoundException('Empresa no encontrada');
 
-        return this.prisma.company.delete({ where: { id } });
+        return this.prisma.company.delete({
+            where: { id },
+            select: {
+                id: true,
+                name: true,
+            },
+        });
     }
 
     async getSettings(companyId: string) {
@@ -77,11 +131,9 @@ import { FilesService } from '../files/files.service';
             where: { id: companyId },
             select: { settings: true },
         });
-
         if (!company) {
             throw new NotFoundException(`Empresa con id ${companyId} no encontrada`);
         }
-
         return company.settings;
     }
 
