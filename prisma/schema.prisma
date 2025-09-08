@@ -8,7 +8,7 @@ datasource db {
 }
 
 /// ================================
-///    Core / Usuarios / Autenticación
+/// Core / Usuarios / Autenticación
 /// ================================
 model User {
   id                String              @id @default(uuid())
@@ -68,7 +68,7 @@ model OAuthAccount {
 }
 
 /// ================================
-///    Company / Configuración
+/// Company / Configuración
 /// ================================
 model Company {
   id              String            @id @default(uuid())
@@ -109,7 +109,7 @@ model UserCompany {
 }
 
 /// ================================
-///    Productos / Inventario
+/// Productos / Inventario
 /// ================================
 model Category {
   id        String    @id @default(uuid())
@@ -188,7 +188,7 @@ model Supplier {
 }
 
 /// ================================
-///    Roles y enums
+/// Roles y enums
 /// ================================
 enum Role {
   PROPIETARIO
