@@ -7,23 +7,23 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-/* ================================
-   Core / Usuarios / Autenticación
-================================ */
+/// ================================
+///    Core / Usuarios / Autenticación
+/// ================================
 model User {
-  id                 String              @id @default(uuid())
-  name               String
-  email              String              @unique
-  passwordHash       String
-  avatarUrl          String?
-  isActive           Boolean             @default(true)
-  createdAt          DateTime            @default(now())
-  updatedAt          DateTime            @default(now()) @updatedAt
-  oauth              OAuthAccount[]
-  sessions           Session[]
-  companies          UserCompany[]
-  passwordReset      PasswordReset[]
-  emailVerification  EmailVerification[]
+  id                String              @id @default(uuid())
+  name              String
+  email             String              @unique
+  passwordHash      String
+  avatarUrl         String?
+  isActive          Boolean             @default(true)
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @default(now()) @updatedAt
+  emailVerification EmailVerification[]
+  oauth             OAuthAccount[]
+  passwordReset     PasswordReset[]
+  sessions          Session[]
+  companies         UserCompany[]
 }
 
 model Session {
@@ -67,9 +67,129 @@ model OAuthAccount {
   @@unique([provider, providerUserId])
 }
 
-/* ================================
-   Roles y enums
-================================ */
+/// ================================
+///    Company / Configuración
+/// ================================
+model Company {
+  id              String            @id @default(uuid())
+  name            String            @unique
+  logoFileId      String?
+  createdAt       DateTime          @default(now())
+  mail            String            @unique
+  pais            String
+  passwordHash    String
+  razonSocial     String
+  rubroPrincipal  String
+  rut_Cuit        String            @unique
+  categories      Category[]
+  settings        CompanySettings?
+  CompanySupplier CompanySupplier[]
+  products        Product[]
+  StockMovements  StockMovements[]
+  members         UserCompany[]
+}
+
+model CompanySettings {
+  companyId     String  @id
+  invoicePrefix String  @default("S-")
+  bajoStock     Int     @default(5)
+  tema          String?
+  company       Company @relation(fields: [companyId], references: [id])
+}
+
+model UserCompany {
+  id        String  @id @default(uuid())
+  userId    String
+  companyId String
+  role      Role
+  company   Company @relation(fields: [companyId], references: [id])
+  user      User    @relation(fields: [userId], references: [id])
+
+  @@unique([userId, companyId])
+}
+
+/// ================================
+///    Productos / Inventario
+/// ================================
+model Category {
+  id        String    @id @default(uuid())
+  companyId String
+  name      String
+  company   Company   @relation(fields: [companyId], references: [id])
+  products  Product[]
+
+  @@unique([companyId, name])
+}
+
+model Product {
+  id             String           @id @default(uuid())
+  companyId      String
+  name           String
+  sku            String
+  barcode        String?
+  description    String?
+  price          Float
+  cost           Float?
+  categoryId     String?
+  imageFileId    String?          @unique
+  category       Category?        @relation(fields: [categoryId], references: [id])
+  company        Company          @relation(fields: [companyId], references: [id])
+  imageFile      File?            @relation("ProductImage", fields: [imageFileId], references: [id])
+  StockMovements StockMovements[]
+
+  @@unique([companyId, sku])
+}
+
+model File {
+  id        String   @id @default(uuid())
+  name      String
+  mimeType  String
+  url       String
+  createdAt DateTime @default(now())
+  product   Product? @relation("ProductImage")
+}
+
+model CompanySupplier {
+  id         String   @id
+  companyId  String
+  supplierId String
+  Company    Company  @relation(fields: [companyId], references: [id])
+  Supplier   Supplier @relation(fields: [supplierId], references: [id])
+
+  @@unique([companyId, supplierId])
+}
+
+model StockMovements {
+  id        String            @id
+  companyId String
+  productId String
+  type      StockMovementType
+  qty       Int
+  reason    String?
+  refType   String?
+  refId     String?
+  createdAt DateTime          @default(now())
+  Company   Company           @relation(fields: [companyId], references: [id])
+  Product   Product           @relation(fields: [productId], references: [id])
+}
+
+model Supplier {
+  id              String            @id
+  name            String
+  cif             String            @unique
+  phone           String?
+  email           String?
+  contactName     String?
+  address         String?
+  lat             Float?
+  lng             Float?
+  currency        String
+  CompanySupplier CompanySupplier[]
+}
+
+/// ================================
+///    Roles y enums
+/// ================================
 enum Role {
   PROPIETARIO
   EMPLEADO
@@ -88,148 +208,14 @@ enum OAuthProvider {
   GOOGLE
 }
 
-enum FacturaStatus  {
+enum FacturaStatus {
   PAGADA
   POR_PAGAR
   VENCIDA
-}
-
-/* ================================
-   Company / Configuración
-================================ */
-model Company {
-  id              String             @id @default(uuid())
-  name            String
-  mail            String             @unique
-  passwordHash    String
-  pais            String
-  razonSocial     String
-  rut_Cuit        String             @unique
-  rubroPrincipal  String
-  logoFileId      String?
-  createdAt       DateTime           @default(now())
-  
-  settings        CompanySettings?
-  members         UserCompany[]
-  categories      Category[]
-  products        Product[]
-  stockMovements  MovimientosStock[] @relation("StockMovementToCompany")
-  proveedores     CompanyProveedor[]
-
-  @@unique([name])
-}
-
-model CompanySettings {
-  companyId         String  @id
-  bajoStock         Int     @default(5)
-  invoicePrefix     String  @default("S-")
-  tema              String?
-
-  company           Company @relation(fields: [companyId], references: [id])
-}
-
-model UserCompany {
-  id        String  @id @default(uuid())
-  userId    String
-  companyId String
-  role      Role
-
-  company   Company @relation(fields: [companyId], references: [id])
-  user      User    @relation(fields: [userId], references: [id])
-
-  @@unique([userId, companyId])
-}
-
-/* ================================
-   Proveedores
-================================ */
-model Proveedor {
-  id             String             @id @default(uuid())
-  nombre         String
-  cif            String             @unique
-  telefono       String?
-  email          String?
-  nombreContacto String?
-  direccion      String?
-  lat            Float?
-  lng            Float?
-  moneda         String
-
-  companies      CompanyProveedor[]
-}
-
-model CompanyProveedor {
-  id          String     @id @default(uuid())
-  companyId   String
-  proveedorId String
-
-  company     Company    @relation(fields: [companyId], references: [id])
-  proveedor   Proveedor  @relation(fields: [proveedorId], references: [id])
-
-  @@unique([companyId, proveedorId])
-}
-
-/* ================================
-   Productos / Inventario
-================================ */
-model Category {
-  id        String    @id @default(uuid())
-  companyId String
-  name      String
-  company   Company   @relation(fields: [companyId], references: [id])
-  
-  products  Product[]
-
-  @@unique([companyId, name]) // nombre único por empresa
-}
-
-model Product {
-  id             String             @id @default(uuid())
-  companyId      String
-  name           String
-  sku            String
-  barcode        String?
-  description    String?
-  price          Float
-  cost           Float?
-  categoryId     String?
-  imageFileId    String?            @unique
-
-  imageFile      File?              @relation("ProductImage", fields: [imageFileId], references: [id])
-  stockMovements MovimientosStock[] @relation("StockMovementToProduct")
-  company        Company            @relation(fields: [companyId], references: [id])
-  category       Category?          @relation(fields: [categoryId], references: [id])
-
-  @@unique([companyId, sku])
-}
-
-model File {
-  id        String   @id @default(uuid())
-  name      String
-  mimeType  String
-  url       String
-  createdAt DateTime @default(now())
-
-  product   Product? @relation("ProductImage")
 }
 
 enum StockMovementType {
   ENTRADA
   SALIDA
   AJUSTE
-}
-
-model MovimientosStock {
-  id        String            @id @default(uuid())
-  companyId String
-  productId String
-  type      StockMovementType
-  qty       Int
-  reason    String?
-  refType   String?
-  refId     String?
-  createdAt DateTime          @default(now())
-
-  company   Company  @relation("StockMovementToCompany", fields: [companyId], references: [id])
-  product   Product  @relation("StockMovementToProduct", fields: [productId], references: [id])
 }
