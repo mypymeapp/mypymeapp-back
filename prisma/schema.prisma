@@ -188,11 +188,11 @@ model Supplier {
 }
 
 /// ================================
-/// Roles y enums
+/// Roles and enums
 /// ================================
 enum Role {
-  PROPIETARIO
-  EMPLEADO
+  OWNER       
+  EMPLOYEE    
   ADMIN
 }
 
@@ -208,14 +208,14 @@ enum OAuthProvider {
   GOOGLE
 }
 
-enum FacturaStatus {
-  PAGADA
-  POR_PAGAR
-  VENCIDA
+enum InvoiceStatus {  
+  PAID        
+  PENDING     
+  OVERDUE     
 }
 
 enum StockMovementType {
-  ENTRADA
-  SALIDA
-  AJUSTE
+  IN
+  OUT
+  ADJUSTMENT
 }
