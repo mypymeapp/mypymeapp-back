@@ -26,6 +26,7 @@ import {
   ApiBearerAuth,
   //ApiBody,
   ApiTags,
+  ApiOperation,
 } from '@nestjs/swagger';
 import { FilesService } from 'src/files/files.service';
 import { FileInterceptor } from '@nestjs/platform-express/multer/interceptors';
@@ -39,18 +40,24 @@ export class UsersController {
     private readonly filesService: FilesService,
   ) {}
 
+  @ApiOperation({ summary: 'Get all users' })
   @Get()
   // @Roles(Role.ADMIN, Role.PROPIETARIO)
   getUsers(@Query('companyId') companyId?: string) {
     return this.usersService.getUsers(companyId);
   }
 
+  @ApiOperation({ summary: 'Get user info passing user id as a parameter' })
   @Get(':id')
   // @Roles(Role.ADMIN, Role.PROPIETARIO, Role.EMPLEADO)
   getUser(@Param('id', ParseUUIDPipe) id: string) {
     return this.usersService.getUserById(id);
   }
 
+  @ApiOperation({
+    summary:
+      'Update user name, email or avatar info passing user id as a parameter',
+  })
   @Patch(':id')
   // @Roles(Role.ADMIN, Role.PROPIETARIO)
   updateUser(
@@ -60,6 +67,7 @@ export class UsersController {
     return this.usersService.updateUser(id, dto);
   }
 
+  @ApiOperation({ summary: 'Add avatar passing user id as a parameter' })
   @ApiBearerAuth()
   @Post(':id/avatar')
   @UseInterceptors(FileInterceptor('avatar'))
@@ -82,19 +90,21 @@ export class UsersController {
       ...result,
     };
   }
-
+  @ApiOperation({ summary: 'Delete a user by passing the id as a parameter' })
   @Delete(':id')
   // @Roles(Role.PROPIETARIO)
   deleteUser(@Param('id', ParseUUIDPipe) id: string) {
     return this.usersService.deleteUser(id);
   }
 
+  @ApiOperation({ summary: 'Get companies associated with a user' })
   @Get(':id/companies')
   // @Roles(Role.ADMIN, Role.PROPIETARIO, Role.EMPLEADO)
   getUserCompanies(@Param('id', ParseUUIDPipe) id: string) {
     return this.usersService.getUserCompanies(id);
   }
 
+  @ApiOperation({ summary: 'Change user role in a company' })
   @Post(':id/companies/:companyId/role')
   // @Roles(Role.PROPIETARIO)
   changeRole(
