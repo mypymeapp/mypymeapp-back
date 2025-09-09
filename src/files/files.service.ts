@@ -37,9 +37,11 @@ export class FilesService {
             productId,
         });
 
-        await this.prisma.product.update({
-            where: { id: productId },
-            data: { imageFileId: savedFile.id },
+        await this.prisma.productImage.create({
+            data: {
+            product: { connect: { id: productId } },
+            file: { connect: { id: savedFile.id } },
+            },
         });
 
         return {

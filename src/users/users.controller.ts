@@ -26,6 +26,7 @@ import {
   ApiBearerAuth,
   //ApiBody,
   ApiTags,
+  ApiOperation,
 } from '@nestjs/swagger';
 import { FilesService } from 'src/files/files.service';
 import { FileInterceptor } from '@nestjs/platform-express/multer/interceptors';
@@ -39,20 +40,26 @@ export class UsersController {
     private readonly filesService: FilesService,
   ) {}
 
+  @ApiOperation({ summary: 'Get all users' })
   @Get()
-  // @Roles(Role.ADMIN, Role.PROPIETARIO)
+  // @Roles(Role.ADMIN, Role.OWNER)
   getUsers(@Query('companyId') companyId?: string) {
     return this.usersService.getUsers(companyId);
   }
 
+  @ApiOperation({ summary: 'Get user info passing user id as a parameter' })
   @Get(':id')
-  // @Roles(Role.ADMIN, Role.PROPIETARIO, Role.EMPLEADO)
+  // @Roles(Role.ADMIN, Role.OWNER, Role.EMPLOYEE)
   getUser(@Param('id', ParseUUIDPipe) id: string) {
     return this.usersService.getUserById(id);
   }
 
+  @ApiOperation({
+    summary:
+      'Update user name, email or avatar info passing user id as a parameter',
+  })
   @Patch(':id')
-  // @Roles(Role.ADMIN, Role.PROPIETARIO)
+  // @Roles(Role.ADMIN, Role.OWNER)
   updateUser(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateUserDto,
@@ -60,6 +67,7 @@ export class UsersController {
     return this.usersService.updateUser(id, dto);
   }
 
+  @ApiOperation({ summary: 'Add avatar passing user id as a parameter' })
   @ApiBearerAuth()
   @Post(':id/avatar')
   @UseInterceptors(FileInterceptor('avatar'))
@@ -82,28 +90,30 @@ export class UsersController {
       ...result,
     };
   }
-
+  @ApiOperation({ summary: 'Delete a user by passing the id as a parameter' })
   @Delete(':id')
-  // @Roles(Role.PROPIETARIO)
+  // @Roles(Role.OWNER)
   deleteUser(@Param('id', ParseUUIDPipe) id: string) {
     return this.usersService.deleteUser(id);
   }
 
+  @ApiOperation({ summary: 'Get companies associated with a user' })
   @Get(':id/companies')
-  // @Roles(Role.ADMIN, Role.PROPIETARIO, Role.EMPLEADO)
+  // @Roles(Role.ADMIN, Role.OWNER, Role.EMPLOYEE)
   getUserCompanies(@Param('id', ParseUUIDPipe) id: string) {
     return this.usersService.getUserCompanies(id);
   }
 
+  @ApiOperation({ summary: 'Change user role in a company' })
   @Post(':id/companies/:companyId/role')
-  // @Roles(Role.PROPIETARIO)
+  // @Roles(Role.OWNER)
   changeRole(
     @Param('id', ParseUUIDPipe) id: string,
     @Param('companyId', ParseUUIDPipe) companyId: string,
     @Body() dto: ChangeRoleDto,
   ) {
     // En la práctica, extraer rol del usuario logueado via JWT
-    const currentUserRole = Role.PROPIETARIO;
+    const currentUserRole = Role.OWNER;
     return this.usersService.changeRole(id, companyId, dto, currentUserRole);
   }
 }

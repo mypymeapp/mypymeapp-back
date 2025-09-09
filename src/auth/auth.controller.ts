@@ -9,7 +9,7 @@ import { GetCurrentUser, type CurrentUser } from './decorators/current-user.deco
 import { ApiTags } from '@nestjs/swagger';
 
 @Controller('auth')
-@ApiTags('Autenticación')
+@ApiTags('Authentications')
 export class AuthController {
 
     constructor(private authService: AuthService) {}
