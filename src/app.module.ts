@@ -6,13 +6,17 @@ import { UsersModule } from './users/users.module';
 import { PrismaModule } from '../prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { SeedService } from './seeds/seed.service';
+import { CategoriesModule } from './Category/category.module';
+import { ProductsModule } from './product/product.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     UsersModule,
     PrismaModule,
-    AuthModule,
+    AuthModule, 
+    CategoriesModule, 
+    ProductsModule
   ],
   controllers: [AppController],
   providers: [AppService, SeedService],

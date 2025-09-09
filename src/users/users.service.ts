@@ -65,7 +65,7 @@ export class UsersService {
     /** Cambiar rol de usuario en una compañía */
     async changeRole(userId: string, companyId: string, dto: ChangeRoleDto, currentUserRole: Role) {
         // Validación: solo PROPIETARIO puede cambiar roles en su compañía
-        if (currentUserRole !== Role.PROPIETARIO) throw new ForbiddenException('No autorizado, solo PROPIETARIOS');
+        if (currentUserRole !== Role.OWNER) throw new ForbiddenException('No autorizado, solo PROPIETARIOS');
 
         const userCompany = await this.prisma.userCompany.findUnique({
             where: { userId_companyId: { userId, companyId } },
