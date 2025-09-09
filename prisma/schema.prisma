@@ -122,7 +122,7 @@ model Category {
 }
 
 model Product {
-  id             String           @id @default(uuid())
+  id             String          @id @default(uuid())
   companyId      String
   name           String
   sku            String
@@ -131,22 +131,33 @@ model Product {
   price          Float
   cost           Float?
   categoryId     String?
-  imageFileId    String?          @unique
-  category       Category?        @relation(fields: [categoryId], references: [id])
-  company        Company          @relation(fields: [companyId], references: [id])
-  imageFile      File?            @relation("ProductImage", fields: [imageFileId], references: [id])
+
+  company        Company         @relation(fields: [companyId], references: [id])
+  category       Category?       @relation(fields: [categoryId], references: [id])
+
+  images         ProductImage[]  @relation("ProductToImages") // varias imágenes
   StockMovements StockMovements[]
 
   @@unique([companyId, sku])
 }
 
-model File {
+model ProductImage {
   id        String   @id @default(uuid())
-  name      String
-  mimeType  String
-  url       String
-  createdAt DateTime @default(now())
-  product   Product? @relation("ProductImage")
+  productId String
+  fileId    String
+
+  product   Product @relation("ProductToImages", fields: [productId], references: [id])
+  file      File    @relation("FileToProductImages", fields: [fileId], references: [id])
+}
+
+model File {
+  id            String          @id @default(uuid())
+  name          String
+  mimeType      String
+  url           String
+  createdAt     DateTime        @default(now())
+
+  productImages ProductImage[]  @relation("FileToProductImages")
 }
 
 model CompanySupplier {

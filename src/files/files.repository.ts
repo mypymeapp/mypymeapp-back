@@ -6,14 +6,13 @@ export class FilesRepository {
     constructor(private prisma: PrismaService) {}
 
     async saveFile(data: { name: string; mimeType: string; url: string; productId?: string }) {
-    return await this.prisma.file.create({
-        data: {
-        name: data.name,
-        mimeType: data.mimeType,
-        url: data.url,
-        product: data.productId ? { connect: { id: data.productId } } : undefined,
-        },
-    });
+        return await this.prisma.file.create({
+            data: {
+                name: data.name,
+                mimeType: data.mimeType,
+                url: data.url,
+            },
+        });
     }
 
 }
