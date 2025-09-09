@@ -1,100 +1,120 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, ForbiddenException, InternalServerErrorException } from '@nestjs/common';
 import { SignupDto } from 'src/auth/dto/signup.dto';
 import { SigninDto } from 'src/auth/dto/signin.dto';
-import * as bcrypt from 'bcrypt';   
-import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'prisma/prisma.service';
+import { AuthLib } from './utils/auth.lib';
 import { Response } from 'express';
 
 @Injectable()
 export class AuthService {
-    constructor(private prisma: PrismaService, private jwtService: JwtService) {}
+    constructor(
+        private prisma: PrismaService, 
+        private authLib: AuthLib
+    ) {}
+
+    async validateUser(email: string, password: string) {
+        const user = await this.authLib.validateUser({ email, password });
+        if (!user) return null;
+
+        const compare = await this.authLib.comparePassword(password, user.passwordHash);
+        if (!compare) return null;
+
+        // Return user without password hash for security
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { passwordHash, ...result } = user;
+        return result;
+    }
 
     async signIn(dto: SigninDto, res: Response) {
         
-        const user = await this.prisma.user.findUnique({ where: { email: dto.email } });
-        if (!user) {
-            throw new NotFoundException('Usuario no encontrado');
+        const user = await this.authLib.validateUser(dto);
+        if (!user) throw new ForbiddenException('Invalid credentials');
+
+        const compare = await this.authLib.comparePassword(dto.password, user.passwordHash);
+        if (!compare) throw new ForbiddenException('Invalid credentials');
+
+        try {
+            const token = await this.authLib.generateToken(user);
+            this.authLib.addCookie(res, token);
+            return {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+            };
+        } catch {
+            throw new InternalServerErrorException('Internal server error');
         }
-
-        const isMatch = await bcrypt.compare(dto.password, user.passwordHash);
-        if (!isMatch) {
-            throw new ForbiddenException('Credenciales inválidas');
-        }
-
-        const payload = {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-        };
-
-        const token = this.jwtService.sign(payload, {
-            secret: process.env.JWT_SECRET,
-            expiresIn: '15m',
-        });
-
-        // Establecer cookie HTTP-only con el token
-        res.cookie('auth-token', token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production', // HTTPS en producción
-            sameSite: 'strict',
-            maxAge: 15 * 60 * 1000, // 15 minutos en milliseconds
-        });
-
-        return { user: {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            avatarUrl: user.avatarUrl,
-        } };
     }
 
-    async signUp(dto: SignupDto, res: Response) {
-        // Verificar si ya existe el usuario
-        const user = await this.prisma.user.findUnique({ where: { email: dto.email } });
-        if (user) throw new ForbiddenException('Usuario ya existe');
+    async signUp(dto: SignupDto) {
+        const user = await this.authLib.validateUser(dto);
+        if (user) throw new ForbiddenException('User already exists');
 
-        // Encriptar la contraseña
-        const passwordHash = await bcrypt.hash(dto.password, 10);
+        try {
+            const passwordHash = await this.authLib.hashPassword(dto.password);
 
-        // Crear usuario (NO pasamos dto completo porque incluye `password`)
-        const newUser = await this.prisma.user.create({
-            data: {
-            name: dto.name,
-            email: dto.email,
-            passwordHash,
-            avatarUrl: dto.avatarUrl,
-            },
-        });
+            await this.prisma.user.create({
+                data: {
+                    name: dto.name,
+                    email: dto.email,
+                    passwordHash,
+                    avatarUrl: dto.avatarUrl,
+                },
+            });
 
-        // Generar token
-        const payload = { id: newUser.id, name: newUser.name, email: newUser.email };
-        const token = this.jwtService.sign(payload, {
-            secret: process.env.JWT_SECRET,
-            expiresIn: '15m',
-        });
-
-        // Guardar token en cookie HTTP-only
-        res.cookie('auth-token', token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-            maxAge: 15 * 60 * 1000,
-        });
-
-        return {
-            user: {
-            id: newUser.id,
-            name: newUser.name,
-            email: newUser.email,
-            avatarUrl: newUser.avatarUrl,
-            createdAt: newUser.createdAt,
-            },
-        };
+            return {
+                status: 'success',
+                message: 'User signed up successfully',
+            };
+        } catch {
+            throw new InternalServerErrorException('Internal server error');
+        }
     }
 
     async signOut(res: Response) {
         res.clearCookie('auth-token');
-        return { message: 'Logout exitoso' };
+        return { 
+            status: 'success', 
+            message: 'User signed out successfully' 
+        };
     }
+
+    async validateOrCreateGoogleUser(googleUser: any) {
+        // Check if user exists in database
+        let user = await this.authLib.findUserByEmail(googleUser.email);
+        
+        if (!user) {
+            // User doesn't exist, create new user
+            try {
+                user = await this.prisma.user.create({
+                    data: {
+                        name: googleUser.name,
+                        email: googleUser.email,
+                        passwordHash: '', // Google users don't have passwords
+                        avatarUrl: googleUser.avatarUrl,
+                    },
+                });
+            } catch {
+                throw new InternalServerErrorException('Error creating Google user');
+            }
+        }
+        
+        return user;
+    }
+
+    async signInWithGoogleUser(googleUser: any, res: Response) {
+        // User is already validated and created by GoogleStrategy
+        try {
+            const token = await this.authLib.generateToken(googleUser);
+            this.authLib.addCookie(res, token);
+            return {
+                id: googleUser.id,
+                name: googleUser.name,
+                email: googleUser.email,
+            };
+        } catch {
+            throw new InternalServerErrorException('Internal server error');
+        }
+    }
+
 }
