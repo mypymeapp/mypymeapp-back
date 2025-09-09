@@ -117,6 +117,7 @@ model Category {
   name      String
   company   Company   @relation(fields: [companyId], references: [id])
   products  Product[]
+  suppliers Supplier[] 
 
   @@unique([companyId, name])
 }
@@ -195,7 +196,8 @@ model Supplier {
   currency      Currency[]  
   hasDebt       Boolean              @default(false)
   pendingGoods  Boolean              @default(false)
-
+  categoryId    String
+  category      Category   @relation(fields: [categoryId], references: [id])
   CompanySupplier CompanySupplier[]
 }
 
