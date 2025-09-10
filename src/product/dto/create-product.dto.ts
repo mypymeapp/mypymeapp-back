@@ -6,6 +6,7 @@ import {
     IsUUID,
     IsNumber,
     Min,
+    IsInt,
 } from 'class-validator';
 
 export class CreateProductDto {
@@ -47,6 +48,11 @@ export class CreateProductDto {
     @IsOptional()
     @IsUUID()
     categoryId?: string;
+
+    @IsOptional()
+    @IsInt()
+    @Min(0)
+    qty?: number;
 
     @ApiProperty({
         example: ['file-uuid-1', 'file-uuid-2'],

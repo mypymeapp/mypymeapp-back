@@ -132,6 +132,7 @@ model Product {
   price          Float
   cost           Float?
   categoryId     String?
+  qty            Int             @default(0) // stock actual, no negativo
 
   company        Company         @relation(fields: [companyId], references: [id])
   category       Category?       @relation(fields: [categoryId], references: [id])
@@ -172,7 +173,7 @@ model CompanySupplier {
 }
 
 model StockMovements {
-  id        String            @id
+  id        String            @id @default(uuid())
   companyId String
   productId String
   type      StockMovementType
