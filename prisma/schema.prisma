@@ -117,6 +117,7 @@ model Category {
   name      String
   company   Company   @relation(fields: [companyId], references: [id])
   products  Product[]
+  suppliers Supplier[] 
 
   @@unique([companyId, name])
 }
@@ -131,6 +132,7 @@ model Product {
   price          Float
   cost           Float?
   categoryId     String?
+  qty            Int             @default(0) // stock actual, no negativo
 
   company        Company         @relation(fields: [companyId], references: [id])
   category       Category?       @relation(fields: [categoryId], references: [id])
@@ -171,7 +173,7 @@ model CompanySupplier {
 }
 
 model StockMovements {
-  id        String            @id
+  id        String            @id @default(uuid())
   companyId String
   productId String
   type      StockMovementType
@@ -185,16 +187,18 @@ model StockMovements {
 }
 
 model Supplier {
-  id              String            @id
-  name            String
-  cif             String            @unique
-  phone           String?
-  email           String?
-  contactName     String?
-  address         String?
-  lat             Float?
-  lng             Float?
-  currency        String
+  id            String               @id 
+  name          String
+  email         String               @unique
+  phone         String
+  contactName   String
+  address       String
+  country       Country
+  currency      Currency[]  
+  hasDebt       Boolean              @default(false)
+  pendingGoods  Boolean              @default(false)
+  categoryId    String
+  category      Category   @relation(fields: [categoryId], references: [id])
   CompanySupplier CompanySupplier[]
 }
 
@@ -213,6 +217,12 @@ enum Currency {
   ARS
   BRL
   EUR
+}
+
+enum Country {
+  ARGENTINA
+  URUGUAY
+  CHILE
 }
 
 enum OAuthProvider {
