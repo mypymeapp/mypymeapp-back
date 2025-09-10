@@ -4,6 +4,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { UserSeed } from './user.seed';
 import { CompanySeed } from './company.seed';
 import { CategorySeed } from './category.seed';
+import { ProductSeed } from './product.seed';
 
 @Injectable()
 export class SeedService implements OnModuleInit {
@@ -20,6 +21,8 @@ export class SeedService implements OnModuleInit {
     await companySeed.run();
     const categorySeed = new CategorySeed(this.prisma);
     await categorySeed.run();
+    const productSeed = new ProductSeed(this.prisma);
+    await productSeed.run();
   }
 }
 
