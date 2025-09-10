@@ -6,6 +6,12 @@ export class ProductSeed {
   constructor(private readonly prisma: PrismaService) {}
 
   async run() {
+    const count = await this.prisma.product.count();
+    if (count > 0) {
+      console.log('Seed - Producs: already exist, skipping products seeding.');
+      return;
+    }
+
     // buscamos la primera company
     const company = await this.prisma.company.findFirst();
     if (!company) {
