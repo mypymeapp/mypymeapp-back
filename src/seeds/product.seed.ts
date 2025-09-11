@@ -136,7 +136,7 @@ export class ProductSeed {
     }
 
     console.log(
-      `✅ Seed de ${productsData.length} productos creado en la compañía '${company.name}' y categoría '${category.name}'`,
+      `✅ Seed of ${productsData.length} products created on company '${company.name}' and category '${category.name}'`,
     );
   }
 }
