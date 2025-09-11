@@ -75,6 +75,30 @@ export class SupplierService {
     return supplier;
   }
 
+  async getAllSuppliers() {
+    return this.prisma.supplier.findMany({
+      include: {
+        category: true,
+        CompanySupplier: {
+          include: { Company: true },
+        },
+      },
+    });
+  }
+
+  async getSupplierById(supplierId: string) {
+    const supplier = await this.prisma.supplier.findUnique({
+      where: { id: supplierId },
+      include: {
+        category: true,
+        CompanySupplier: {
+          include: { Company: true },
+        },
+      },
+    });
+    if (!supplier) throw new NotFoundException('Supplier not found');
+    return supplier;
+  }
   async getSuppliersByCompany(companyId: string) {
     return this.prisma.supplier.findMany({
       where: {
