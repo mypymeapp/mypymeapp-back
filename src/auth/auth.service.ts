@@ -19,8 +19,6 @@ export class AuthService {
         const compare = await this.authLib.comparePassword(password, user.passwordHash);
         if (!compare) return null;
 
-        // Return user without password hash for security
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { passwordHash, ...result } = user;
         return result;
     }
@@ -80,26 +78,46 @@ export class AuthService {
     }
 
     async validateOrCreateGoogleUser(googleUser: any) {
-        // Check if user exists in database
-        let user = await this.authLib.findUserByEmail(googleUser.email);
-        
-        if (!user) {
-            // User doesn't exist, create new user
-            try {
-                user = await this.prisma.user.create({
-                    data: {
-                        name: googleUser.name,
-                        email: googleUser.email,
-                        passwordHash: '', // Google users don't have passwords
-                        avatarUrl: googleUser.avatarUrl,
-                    },
-                });
-            } catch {
-                throw new InternalServerErrorException('Error creating Google user');
+        try {
+            // Check if user exists in database
+            let user = await this.authLib.findUserByEmail(googleUser.email);
+            
+            if (!user) {
+                // User doesn't exist, create new user
+                try {
+                    user = await this.prisma.user.create({
+                        data: {
+                            name: googleUser.name,
+                            email: googleUser.email,
+                            passwordHash: '', // Google users don't have passwords
+                            avatarUrl: googleUser.avatarUrl,
+                        },
+                    });
+                } catch (createError) {
+                    console.error('Error creating Google user:', createError);
+                    // Retry user creation once
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    try {
+                        user = await this.prisma.user.create({
+                            data: {
+                                name: googleUser.name,
+                                email: googleUser.email,
+                                passwordHash: '', // Google users don't have passwords
+                                avatarUrl: googleUser.avatarUrl,
+                            },
+                        });
+                    } catch (retryCreateError) {
+                        console.error('Retry failed for creating Google user:', retryCreateError);
+                        throw new InternalServerErrorException('Database connection error during Google user creation');
+                    }
+                }
             }
+            
+            return user;
+        } catch (error) {
+            console.error('Database connectivity error in validateOrCreateGoogleUser:', error);
+            throw new InternalServerErrorException('Database connection error during Google authentication');
         }
-        
-        return user;
     }
 
     async signInWithGoogleUser(googleUser: any, res: Response) {

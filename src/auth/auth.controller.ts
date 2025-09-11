@@ -72,12 +72,9 @@ export class AuthController {
   @Get('google/callback')
   async googleCallback(
     @Req() req: RequestWithUser,
-    @Res({ passthrough: true }) res: Response,
+    @Res() res: Response,
   ) {
-    // Para Google OAuth, no utilizamos el método de inicio de sesión normal ya que no hay contraseña
-    // El usuario ya está autenticado y creado/encontrado por GoogleStrategy
-    const response = await this.authService.signInWithGoogleUser(req.user, res);
+    await this.authService.signInWithGoogleUser(req.user, res);
     res.redirect('/');
-    return response;
   }
 }

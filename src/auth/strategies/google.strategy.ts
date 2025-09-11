@@ -26,15 +26,20 @@ export class GoogleStrategy extends PassportStrategy(Strategy) {
         profile: any, 
         done: VerifyCallback
     ) {
-        const googleUser = {
-            name: `${profile.name.givenName} ${profile.name.familyName}`,
-            email: profile.emails[0].value,
-            avatarUrl: profile.photos[0].value,
-        };
+        try {
+            const googleUser = {
+                name: `${profile.name.givenName} ${profile.name.familyName}`,
+                email: profile.emails[0].value,
+                avatarUrl: profile.photos[0].value,
+            };
 
-        // Use AuthService method to validate or create Google user
-        const user = await this.authService.validateOrCreateGoogleUser(googleUser);
-        
-        return done(null, user);
+            // Uso metodo para validar o crear usuario
+            const user = await this.authService.validateOrCreateGoogleUser(googleUser);
+            
+            return done(null, user);
+        } catch (error) {
+            console.error('Google OAuth validation error:', error);
+            return done(error, undefined);
+        }
     }
 }
