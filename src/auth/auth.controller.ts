@@ -26,58 +26,55 @@ interface RequestWithUser extends Request {
 @Controller('auth')
 @ApiTags('Authentications')
 export class AuthController {
-    constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService) {}
 
-    @ApiBody({ type: SignupDto })
-    @ApiCreatedResponse({ type: SignupResponseDto })
-    @Post('register')
-    async register(
-        @Body() dto: SignupDto,
-    ) {
-        return this.authService.signUp(dto);
-    }
+  @ApiBody({ type: SignupDto })
+  @ApiCreatedResponse({ type: SignupResponseDto })
+  @Post('register')
+  async register(
+    @Body() dto: SignupDto,
+  ) {
+    return this.authService.signUp(dto);
+  }
 
-    @ApiBody({ type: SigninDto })
-    @ApiCreatedResponse({ type: SigninResponseDto })
-    @Post('login')
-    async login(
-        @Body() dto: SigninDto,
-        @Res({ passthrough: true }) res: Response,
-    ) {
-        return this.authService.signIn(dto, res);
-    }
+  @ApiBody({ type: SigninDto })
+  @ApiCreatedResponse({ type: SigninResponseDto })
+  @Post('login')
+  async login(
+    @Body() dto: SigninDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    return this.authService.signIn(dto, res);
+  }
 
-    @Post('logout')
-    async logout(@Res({ passthrough: true }) res: Response) {
-        return this.authService.signOut(res);
-    }
+  @Post('logout')
+  async logout(@Res({ passthrough: true }) res: Response) {
+    return this.authService.signOut(res);
+  }
 
-    @UseGuards(JwtAuthGuard)
-    @ApiBearerAuth()
-    @Get('profile')
-    async getProfile(@GetCurrentUser() user: CurrentUser) {
-        return {
-        message: 'Perfil obtenido exitosamente',
-        user,
-        };
-    }
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @Get('profile')
+  async getProfile(@GetCurrentUser() user: CurrentUser) {
+    return {
+      message: 'Perfil obtenido exitosamente',
+      user,
+    };
+  }
 
-    @Public()
-    @UseGuards(GoogleAuthGuard)
-    @Get('google/login')
-    async googleLogin() {} 
-    
-    @Public()
-    @UseGuards(GoogleAuthGuard)
-    @Get('google/callback')
-    async googleCallback(
-        @Req() req: RequestWithUser,
-        @Res({ passthrough: true }) res: Response,
-    ) {
-        // Para Google OAuth, no utilizamos el método de inicio de sesión normal ya que no hay contraseña
-        // El usuario ya está autenticado y creado/encontrado por GoogleStrategy
-        const response = await this.authService.signInWithGoogleUser(req.user, res);
-        res.redirect('/');
-        return response;
-    }
+  @Public()
+  @UseGuards(GoogleAuthGuard)
+  @Get('google/login')
+  async googleLogin() {}
+
+  @Public()
+  @UseGuards(GoogleAuthGuard)
+  @Get('google/callback')
+  async googleCallback(
+    @Req() req: RequestWithUser,
+    @Res() res: Response,
+  ) {
+    await this.authService.signInWithGoogleUser(req.user, res);
+    res.redirect('/');
+  }
 }

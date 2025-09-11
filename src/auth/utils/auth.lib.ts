@@ -19,8 +19,20 @@ export class AuthLib {
     }
 
     async findUserByEmail(email: string) {
-        const user = await this.prisma.user.findUnique({ where: { email } });
-        return user;
+        try {
+            const user = await this.prisma.user.findUnique({ where: { email } });
+            return user;
+        } catch (error) {
+            console.error('Database error in findUserByEmail:', error);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            try {
+                const user = await this.prisma.user.findUnique({ where: { email } });
+                return user;
+            } catch (retryError) {
+                console.error('Database retry failed in findUserByEmail:', retryError);
+                throw retryError;
+            }
+        }
     }
     async comparePassword(password: string, hash: string) {
         const compare = await bcrypt.compare(password, hash);
