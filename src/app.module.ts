@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { SeedService } from './seeds/seed.service';
 import { CategoriesModule } from './category/category.module';
 import { ProductsModule } from './product/product.module';
+import { SupplierModule } from './supplier/supplier.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { ProductsModule } from './product/product.module';
     AuthModule,
     CategoriesModule,
     ProductsModule,
+    SupplierModule,
   ],
   controllers: [AppController],
   providers: [AppService, SeedService],

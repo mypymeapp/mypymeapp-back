@@ -1,47 +1,88 @@
-// // src/supplier/supplier.service.ts
-// import { Injectable } from '@nestjs/common';
-// import { PrismaService } from '../../prisma/prisma.service';
-// import { CreateSupplierDto } from './dto/create-supplier.dto';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
+import { CreateSupplierDto } from './dto/create-supplier.dto';
+import { randomUUID } from 'crypto';
 
-// @Injectable()
-// export class SupplierService {
-//   constructor(private readonly prisma: PrismaService) {}
+@Injectable()
+export class SupplierService {
+  constructor(private readonly prisma: PrismaService) {}
 
-//   async create(data: CreateSupplierDto) {
-//     // Crear el supplier incluyendo la categoría
-//     const supplier = await this.prisma.supplier.create({
-//   data: {
-//     name: data.name,
-//     email: data.email,
-//     phone: data.phone,
-//     contactName: data.contactName,
-//     address: data.address,
-//     country: data.country,
-//     currency: data.currency ?? [],
-//     hasDebt: false,
-//     pendingGoods: false,
-//     category: { connect: { id: data.categoryId } },
-//   },
-//   include: { category: true },
-// });
+  async createSupplier(data: CreateSupplierDto) {
+    // verificar que la company exista
+    const company = await this.prisma.company.findUnique({
+      where: { id: data.companyId },
+    });
+    if (!company) throw new NotFoundException('Company does not exist');
 
-// if (data.companyIds?.length) {
-//   await this.prisma.companySupplier.createMany({
-//     data: data.companyIds.map(companyId => ({
-//       companyId,
-//       supplierId: supplier.id,
-//     })),
-//   });
-// }
+    // verificar que la categoría exista
+    const category = await this.prisma.category.findUnique({
+      where: { id: data.categoryId },
+    });
+    if (!category) throw new NotFoundException('Category does not exist');
 
-// return this.prisma.supplier.findUnique({
-//   where: { id: supplier.id },
-//   include: {
-//     category: true,
-//     CompanySupplier: { include: { Company: true } },
-//   },
-// });
+    // verificar que no exista ya un supplier con el mismo email
+    let supplier = await this.prisma.supplier.findUnique({
+      where: { email: data.email },
+    });
 
-//   }
-// }
+    if (!supplier) {
+      // crear supplier nuevo
+      supplier = await this.prisma.supplier.create({
+        data: {
+          name: data.name,
+          email: data.email,
+          phone: data.phone,
+          contactName: data.contactName,
+          address: data.address,
+          country: data.country,
+          category: { connect: { id: data.categoryId } }, // conecta relación
+          hasDebt: false,
+          pendingGoods: false,
+          currency: [], // si quieres agregar monedas, pasalas aquí
+        },
+      });
+    }
+
+    // verificar si ya está asociado a esa empresa
+    const existingRelation = await this.prisma.companySupplier.findUnique({
+      where: {
+        companyId_supplierId: {
+          companyId: data.companyId,
+          supplierId: supplier.id,
+        },
+      },
+    });
+
+    if (existingRelation) {
+      throw new ConflictException(
+        'El proveedor ya está asociado a esta empresa',
+      );
+    }
+
+    // asociar supplier a la empresa
+    await this.prisma.companySupplier.create({
+      data: {
+        id: randomUUID(),
+        companyId: data.companyId,
+        supplierId: supplier.id,
+      },
+    });
+
+    return supplier;
+  }
+
+  async getSuppliersByCompany(companyId: string) {
+    return this.prisma.supplier.findMany({
+      where: {
+        CompanySupplier: {
+          some: { companyId },
+        },
+      },
+    });
+  }
+}
 
