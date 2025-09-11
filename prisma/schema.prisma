@@ -163,7 +163,7 @@ model File {
 }
 
 model CompanySupplier {
-  id         String   @id
+  id         String   @id @default(uuid())
   companyId  String
   supplierId String
   Company    Company  @relation(fields: [companyId], references: [id])
@@ -187,18 +187,18 @@ model StockMovements {
 }
 
 model Supplier {
-  id            String               @id 
+  id            String   @id @default(uuid())
   name          String
-  email         String               @unique
+  email         String   @unique
   phone         String
   contactName   String
   address       String
   country       Country
-  currency      Currency[]  
-  hasDebt       Boolean              @default(false)
-  pendingGoods  Boolean              @default(false)
+  currency      Currency[]
+  hasDebt       Boolean  @default(false)
+  pendingGoods  Boolean  @default(false)
   categoryId    String
-  category      Category   @relation(fields: [categoryId], references: [id])
+  category      Category @relation(fields: [categoryId], references: [id])
   CompanySupplier CompanySupplier[]
 }
 
