@@ -4,6 +4,7 @@ import { SigninDto } from 'src/auth/dto/signin.dto';
 import { PrismaService } from 'prisma/prisma.service';
 import { AuthLib } from './utils/auth.lib';
 import { Response } from 'express';
+import { CreateGoogleDto } from './dto/google.dto';
 
 @Injectable()
 export class AuthService {
@@ -13,31 +14,38 @@ export class AuthService {
     ) {}
 
     async validateUser(email: string, password: string) {
-        const user = await this.authLib.validateUser({ email, password });
-        if (!user) return null;
+        const result = await this.authLib.validateUser({ email, password });
+        if (!result || !result.user) return null;
 
-        const compare = await this.authLib.comparePassword(password, user.passwordHash);
+        const compare = await this.authLib.comparePassword(password, result.user.passwordHash);
         if (!compare) return null;
 
-        const { passwordHash, ...result } = user;
-        return result;
+        const { passwordHash, ...user } = result.user;
+        return user;
     }
 
     async signIn(dto: SigninDto, res: Response) {
         
-        const user = await this.authLib.validateUser(dto);
-        if (!user) throw new ForbiddenException('Invalid credentials');
+        const result = await this.authLib.validateUser(dto);
+        if (!result || !result.user) throw new ForbiddenException('Invalid credentials');
 
-        const compare = await this.authLib.comparePassword(dto.password, user.passwordHash);
+        const compare = await this.authLib.comparePassword(dto.password, result.user.passwordHash);
         if (!compare) throw new ForbiddenException('Invalid credentials');
 
         try {
-            const token = await this.authLib.generateToken(user);
+            const token = await this.authLib.generateToken(result.user);
             this.authLib.addCookie(res, token);
             return {
-                id: user.id,
-                name: user.name,
-                email: user.email,
+                token: token,
+                user: {
+                    id: result.user.id,
+                    name: result.user.name,
+                    email: result.user.email,
+                    company: {
+                        id: result.company?.id,
+                        name: result.company?.name
+                    },
+                },
             };
         } catch {
             throw new InternalServerErrorException('Internal server error');
@@ -45,8 +53,8 @@ export class AuthService {
     }
 
     async signUp(dto: SignupDto) {
-        const user = await this.authLib.validateUser(dto);
-        if (user) throw new ForbiddenException('User already exists');
+        const result = await this.authLib.validateUser(dto);
+        if (result && result.user) throw new ForbiddenException('User already exists');
 
         try {
             const passwordHash = await this.authLib.hashPassword(dto.password);
@@ -77,7 +85,7 @@ export class AuthService {
         };
     }
 
-    async validateOrCreateGoogleUser(googleUser: any) {
+    async validateOrCreateGoogleUser(googleUser: CreateGoogleDto) {
         try {
             // Check if user exists in database
             let user = await this.authLib.findUserByEmail(googleUser.email);
@@ -92,6 +100,7 @@ export class AuthService {
                             passwordHash: '', // Google users don't have passwords
                             avatarUrl: googleUser.avatarUrl,
                         },
+                        include: { companies: true },
                     });
                 } catch (createError) {
                     console.error('Error creating Google user:', createError);
@@ -105,6 +114,7 @@ export class AuthService {
                                 passwordHash: '', // Google users don't have passwords
                                 avatarUrl: googleUser.avatarUrl,
                             },
+                            include: { companies: true },
                         });
                     } catch (retryCreateError) {
                         console.error('Retry failed for creating Google user:', retryCreateError);
@@ -121,7 +131,7 @@ export class AuthService {
     }
 
     async signInWithGoogleUser(googleUser: any, res: Response) {
-        // User is already validated and created by GoogleStrategy
+        // Usuario validado y creado por GoogleStrategy
         try {
             const token = await this.authLib.generateToken(googleUser);
             this.authLib.addCookie(res, token);

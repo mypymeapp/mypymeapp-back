@@ -14,20 +14,36 @@ export class AuthLib {
     ) {}
 
     async validateUser(data: SigninDto) {
-        const user = await this.prisma.user.findUnique({ where: { email: data.email } });
-        return user;
+        const user = await this.prisma.user.findUnique({ 
+            where: { email: data.email }, 
+            include: { 
+                companies: true,
+            } 
+        });
+        const company = await this.prisma.company.findUnique({ 
+            where: { id: user?.companies[0].companyId }
+        });
+        return { user, company };
     }
 
     async findUserByEmail(email: string) {
         try {
-            const user = await this.prisma.user.findUnique({ where: { email } });
+            const user = await this.prisma.user.findUnique({ where: { email }, include: { companies: true } });
             return user;
         } catch (error) {
             console.error('Database error in findUserByEmail:', error);
             await new Promise(resolve => setTimeout(resolve, 1000));
             try {
-                const user = await this.prisma.user.findUnique({ where: { email } });
-                return user;
+                const user = await this.prisma.user.findUnique({ 
+                    where: { email }, 
+                    include: { 
+                        companies: true,
+                    } 
+                });
+                const company = await this.prisma.company.findUnique({ 
+                    where: { id: user?.companies[0].companyId }
+                });
+                return { user, company };
             } catch (retryError) {
                 console.error('Database retry failed in findUserByEmail:', retryError);
                 throw retryError;
