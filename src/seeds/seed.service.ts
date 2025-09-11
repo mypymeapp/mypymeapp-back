@@ -16,10 +16,10 @@ export class SeedService implements OnModuleInit {
   }
 
   private async runSeeds() {
-    const userSeed = new UserSeed(this.prisma);
-    await userSeed.run();
     const companySeed = new CompanySeed(this.prisma);
     await companySeed.run();
+    const userSeed = new UserSeed(this.prisma);
+    await userSeed.run();
     const categorySeed = new CategorySeed(this.prisma);
     await categorySeed.run();
     const productSeed = new ProductSeed(this.prisma);

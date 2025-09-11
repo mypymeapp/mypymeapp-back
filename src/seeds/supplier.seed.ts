@@ -146,7 +146,7 @@ export class SupplierSeed {
     }
 
     console.log(
-      `✅ Seed de ${suppliersData.length} suppliers creado en la compañía '${company.name}' y categoría '${category.name}'`,
+      `✅ Seed of ${suppliersData.length} suppliers creado created on company '${company.name}' y category '${category.name}'`,
     );
   }
 }
