@@ -20,7 +20,7 @@ import { CreateStockDto } from 'src/stock/dto/create-stock.dto';
 export class ProductsController {
   constructor(
     private readonly productsService: ProductsService,
-    private readonly stockService: StockService
+    private readonly stockService: StockService,
   ) {}
 
   @ApiOperation({ summary: 'Create new product' })
@@ -58,7 +58,7 @@ export class ProductsController {
   }
 
   @Post(':id/stock')
-  @ApiOperation({ summary: 'Registrar un movimiento de stock para un producto' })
+  @ApiOperation({ summary: 'Register a stock movement for a product' })
   async addStockMovement(
     @Param('id', ParseUUIDPipe) productId: string,
     @Body() dto: CreateStockDto,

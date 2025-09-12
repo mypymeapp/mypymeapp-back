@@ -87,6 +87,7 @@ model Company {
   products        Product[]
   StockMovements  StockMovements[]
   members         UserCompany[]
+  customers       Customer[]
 }
 
 model CompanySettings {
@@ -112,54 +113,54 @@ model UserCompany {
 /// Productos / Inventario
 /// ================================
 model Category {
-  id        String    @id @default(uuid())
+  id        String     @id @default(uuid())
   companyId String
   name      String
-  company   Company   @relation(fields: [companyId], references: [id])
+  company   Company    @relation(fields: [companyId], references: [id])
   products  Product[]
-  suppliers Supplier[] 
+  suppliers Supplier[]
 
   @@unique([companyId, name])
 }
 
 model Product {
-  id             String          @id @default(uuid())
-  companyId      String
-  name           String
-  sku            String
-  barcode        String?
-  description    String?
-  price          Float
-  cost           Float?
-  categoryId     String?
-  qty            Int             @default(0) // stock actual, no negativo
+  id          String  @id @default(uuid())
+  companyId   String
+  name        String
+  sku         String
+  barcode     String?
+  description String?
+  price       Float
+  cost        Float?
+  categoryId  String?
+  qty         Int     @default(0) // stock actual, no negativo
 
-  company        Company         @relation(fields: [companyId], references: [id])
-  category       Category?       @relation(fields: [categoryId], references: [id])
+  company  Company   @relation(fields: [companyId], references: [id])
+  category Category? @relation(fields: [categoryId], references: [id])
 
-  images         ProductImage[]  @relation("ProductToImages") // varias imágenes
+  images         ProductImage[]   @relation("ProductToImages") // varias imágenes
   StockMovements StockMovements[]
 
   @@unique([companyId, sku])
 }
 
 model ProductImage {
-  id        String   @id @default(uuid())
+  id        String @id @default(uuid())
   productId String
   fileId    String
 
-  product   Product @relation("ProductToImages", fields: [productId], references: [id])
-  file      File    @relation("FileToProductImages", fields: [fileId], references: [id])
+  product Product @relation("ProductToImages", fields: [productId], references: [id])
+  file    File    @relation("FileToProductImages", fields: [fileId], references: [id])
 }
 
 model File {
-  id            String          @id @default(uuid())
-  name          String
-  mimeType      String
-  url           String
-  createdAt     DateTime        @default(now())
+  id        String   @id @default(uuid())
+  name      String
+  mimeType  String
+  url       String
+  createdAt DateTime @default(now())
 
-  productImages ProductImage[]  @relation("FileToProductImages")
+  productImages ProductImage[] @relation("FileToProductImages")
 }
 
 model CompanySupplier {
@@ -187,27 +188,40 @@ model StockMovements {
 }
 
 model Supplier {
-  id            String   @id @default(uuid())
-  name          String
-  email         String   @unique
-  phone         String
-  contactName   String
-  address       String
-  country       Country
-  currency      Currency[]
-  hasDebt       Boolean  @default(false)
-  pendingGoods  Boolean  @default(false)
-  categoryId    String
-  category      Category @relation(fields: [categoryId], references: [id])
+  id              String            @id @default(uuid())
+  name            String
+  email           String            @unique
+  phone           String
+  contactName     String
+  address         String
+  country         Country
+  currency        Currency[]
+  hasDebt         Boolean           @default(false)
+  pendingGoods    Boolean           @default(false)
+  categoryId      String
+  category        Category          @relation(fields: [categoryId], references: [id])
   CompanySupplier CompanySupplier[]
+}
+
+model Customer {
+  id          String   @id @default(uuid())
+  name        String
+  email       String   @unique
+  phone       String
+  memberSince DateTime @default(now())
+  notes       String?
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id])
+
+  
 }
 
 /// ================================
 /// Roles and enums
 /// ================================
 enum Role {
-  OWNER       
-  EMPLOYEE    
+  OWNER
+  EMPLOYEE
   ADMIN
 }
 
@@ -229,10 +243,10 @@ enum OAuthProvider {
   GOOGLE
 }
 
-enum InvoiceStatus {  
-  PAID        
-  PENDING     
-  OVERDUE     
+enum InvoiceStatus {
+  PAID
+  PENDING
+  OVERDUE
 }
 
 enum StockMovementType {
