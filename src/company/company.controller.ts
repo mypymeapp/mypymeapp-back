@@ -31,7 +31,7 @@ import {
 @ApiTags('Companies')
 @Controller('companies')
 export class CompanyController {
-  constructor(private readonly companyService: CompanyService) {}
+    constructor(private readonly companyService: CompanyService) {}
 
   @ApiOperation({ summary: 'Create new company' })
   @ApiResponse({ status: 201, description: 'Company data' })
@@ -71,11 +71,11 @@ export class CompanyController {
     return this.companyService.deleteCompany(id);
   }
 
-  @ApiOperation({ summary: 'Get company settings' })
-  @Get(':id/settings')
-  getSettings(@Param('id', ParseUUIDPipe) id: string) {
-    return this.companyService.getSettings(id);
-  }
+    @ApiOperation({ summary: 'Get company settings' })
+    @Get(':id/settings')
+    getSettings(@Param('id', ParseUUIDPipe) id: string) {
+      return this.companyService.getSettings(id);
+    }
 
   @ApiOperation({ summary: 'Update company settings' })
   @ApiResponse({ status: 200, description: 'Edited company data' })
@@ -87,14 +87,14 @@ export class CompanyController {
     return this.companyService.updateSettings(id, body);
   }
 
-  @ApiOperation({ summary: 'Add member to a company' })
-  @Post(':id/members')
-  addMember(
-    @Param('id', ParseUUIDPipe) companyId: string,
-    @Body() body: { userId: string; role: Role },
-  ) {
-    return this.companyService.addMember(companyId, body.userId, body.role);
-  }
+    @ApiOperation({ summary: 'Add member to a company' })
+    @Post(':id/members')
+    addMember(
+      @Param('id', ParseUUIDPipe) companyId: string,
+      @Body() body: { userId: string; role: Role },
+    ) {
+      return this.companyService.addMember(companyId, body.userId, body.role);
+    }
 
   @ApiOperation({ summary: 'Actualizar el rol de un miembro' })
   @ApiResponse({ status: 200, description: 'Edited company data' })
