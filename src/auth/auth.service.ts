@@ -16,7 +16,7 @@ export class AuthService {
   constructor(
     private prisma: PrismaService,
     private authLib: AuthLib,
-    private emailService: EmailService
+    private emailService: EmailService,
   ) {}
 
   async validateUser(email: string, password: string) {
@@ -94,7 +94,7 @@ export class AuthService {
       //     user.email,
       //     '¡Bienvenido a MyPyme!',
       //     `<h1>Hola ${user.name} 👋</h1>
-      //     <p>Gracias por registrarte en MyPyme. ¡Esperamos que disfrutes nuestra plataforma!</p>`
+      //     <p>Gracias por registrarte en MyPyme. ¡Esperamos que disfrutes nuestra plataforma!</p>`,
       //   );
       // } catch (err) {
       //   console.error('Error enviando correo de bienvenida:', err);
@@ -110,7 +110,6 @@ export class AuthService {
       throw new InternalServerErrorException('Internal server error');
     }
   }
-
 
   async signOut(res: Response) {
     res.clearCookie('auth-token');
