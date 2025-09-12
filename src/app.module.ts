@@ -9,6 +9,7 @@ import { SeedService } from './seeds/seed.service';
 import { CategoriesModule } from './category/category.module';
 import { ProductsModule } from './product/product.module';
 import { SupplierModule } from './supplier/supplier.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { SupplierModule } from './supplier/supplier.module';
     CategoriesModule,
     ProductsModule,
     SupplierModule,
+    MailModule
   ],
   controllers: [AppController],
   providers: [AppService, SeedService],
