@@ -57,7 +57,7 @@ export class ProductsController {
     return this.productsService.remove(id);
   }
 
-    @Post(':id/stock')
+  @Post(':id/stock')
   @ApiOperation({ summary: 'Registrar un movimiento de stock para un producto' })
   async addStockMovement(
     @Param('id', ParseUUIDPipe) productId: string,
