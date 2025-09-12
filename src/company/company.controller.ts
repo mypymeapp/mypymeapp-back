@@ -116,6 +116,13 @@ export class CompanyController {
     return this.companyService.removeMember(companyId, userId);
   }
 
+  @ApiOperation({ summary: 'Get company inventory (productos con stock)' })
+  @Get(':id/inventory')
+  async getInventory(@Param('id', ParseUUIDPipe) companyId: string) {
+    return this.companyService.getInventory(companyId);
+  }
+
+
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update company logo' })
   @ApiResponse({ status: 201, description: 'Logo successfully uploaded' })
