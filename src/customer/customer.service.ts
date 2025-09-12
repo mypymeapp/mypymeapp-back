@@ -1,20 +1,49 @@
-// nombre
-// mail
-// telefono
-// miembro desde
-// nota
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
+import { CreateCustomerDto } from './dto/create-customer.dto';
 
-// relacion a una compañia
+@Injectable()
+export class CustomerService {
+  constructor(private readonly prisma: PrismaService) {}
 
-// export type Cliente = {
-//   id: string;
-//   nombre: string;
-//   email: string;
-//   telefono: string;
-//   miembroDesde: string;
-//   gastoTotal: number;
-//   compras: Compra[]; // 🔹 todos tendrán historial
-//   notas?: string;
-// };
+  async createCustomer(data: CreateCustomerDto) {
+    const company = await this.prisma.company.findUnique({
+      where: { id: data.companyId },
+    });
+    if (!company) {
+      throw new NotFoundException(
+        `Company with id ${data.companyId} not found`,
+      );
+    }
 
-export class CustomerService {}
+    return this.prisma.customer.create({
+      data: {
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        memberSince: data.memberSince ?? new Date(),
+        notes: data.notes,
+        companyId: data.companyId,
+      },
+    });
+  }
+
+  async getAllCustomers() {
+    return this.prisma.customer.findMany({
+      include: { company: true }, // opcional, incluye datos de la compañía
+    });
+  }
+
+  async getCustomerById(id: string) {
+    const customer = await this.prisma.customer.findUnique({
+      where: { id },
+      include: { company: true },
+    });
+
+    if (!customer)
+      throw new NotFoundException(`Customer with id ${id} not found`);
+
+    return customer;
+  }
+}
+
