@@ -9,12 +9,14 @@ import { PrismaService } from 'prisma/prisma.service';
 import { AuthLib } from './utils/auth.lib';
 import { Response } from 'express';
 import { CreateGoogleDto } from './dto/google.dto';
+import { EmailService } from 'src/mail/mail.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private prisma: PrismaService,
     private authLib: AuthLib,
+    private emailService: EmailService
   ) {}
 
   async validateUser(email: string, password: string) {
@@ -63,6 +65,7 @@ export class AuthService {
   }
 
   async signUp(dto: SignupDto) {
+    // Verificar si el usuario ya existe
     const existingUser = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });
@@ -70,10 +73,13 @@ export class AuthService {
     if (existingUser) {
       throw new ForbiddenException('User already exists');
     }
+
     try {
+      // Hashear la contraseña
       const passwordHash = await this.authLib.hashPassword(dto.password);
 
-      await this.prisma.user.create({
+      // Crear el usuario en la base de datos y guardar la referencia
+      const user = await this.prisma.user.create({
         data: {
           name: dto.name,
           email: dto.email,
@@ -82,14 +88,29 @@ export class AuthService {
         },
       });
 
+      // Enviar correo de bienvenida (no bloquea el registro si falla)
+      // try {
+      //   await this.emailService.sendEmail(
+      //     user.email,
+      //     '¡Bienvenido a MyPyme!',
+      //     `<h1>Hola ${user.name} 👋</h1>
+      //     <p>Gracias por registrarte en MyPyme. ¡Esperamos que disfrutes nuestra plataforma!</p>`
+      //   );
+      // } catch (err) {
+      //   console.error('Error enviando correo de bienvenida:', err);
+      // }
+
+      // Retornar respuesta al cliente
       return {
         status: 'success',
         message: 'User signed up successfully',
       };
-    } catch {
+    } catch (error) {
+      console.error(error);
       throw new InternalServerErrorException('Internal server error');
     }
   }
+
 
   async signOut(res: Response) {
     res.clearCookie('auth-token');

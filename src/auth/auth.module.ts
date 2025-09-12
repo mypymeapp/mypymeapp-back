@@ -9,6 +9,7 @@ import { ConfigModule } from '@nestjs/config';
 import googleOauthConfig from './utils/google-oauth.config';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { AuthLib } from './utils/auth.lib';
+import { EmailService } from 'src/mail/mail.service';
 
 @Module({
   imports: [
@@ -22,7 +23,8 @@ import { AuthLib } from './utils/auth.lib';
     PrismaService, 
     JwtAuthGuard,
     GoogleStrategy,
-    AuthLib
+    AuthLib, 
+    EmailService
   ],
   exports: [JwtAuthGuard]
 })
