@@ -34,26 +34,28 @@ export class CompanyController {
   constructor(private readonly companyService: CompanyService) {}
 
   @ApiOperation({ summary: 'Create new company' })
-  @ApiResponse({ status: 201, description: 'Empresa creada exitosamente' })
+  @ApiResponse({ status: 201, description: 'Company data' })
   @Post()
   create(@Body() data: CreateCompanyDto) {
     return this.companyService.createCompany(data);
   }
 
   @ApiOperation({ summary: 'Get all companies' })
+  @ApiResponse({ status: 200, description: 'Company list' })
   @Get()
   findAll() {
     return this.companyService.getCompanies();
   }
 
   @ApiOperation({ summary: 'Get a company passing id as a parameter' })
-  @ApiResponse({ status: 404, description: 'Empresa no encontrada' })
+  @ApiResponse({ status: 200, description: 'Specific company data' })
   @Get(':id')
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.companyService.getCompanyById(id);
   }
 
   @ApiOperation({ summary: 'Update company data' })
+  @ApiResponse({ status: 200, description: 'Edited company data' })
   @Put(':id')
   update(
     @Param('id', ParseUUIDPipe) id: string,
@@ -63,6 +65,7 @@ export class CompanyController {
   }
 
   @ApiOperation({ summary: 'Delete a company' })
+  @ApiResponse({ status: 200, description: 'Deleted company data' })
   @Delete(':id')
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.companyService.deleteCompany(id);
@@ -75,6 +78,7 @@ export class CompanyController {
   }
 
   @ApiOperation({ summary: 'Update company settings' })
+  @ApiResponse({ status: 200, description: 'Edited company data' })
   @Patch(':id/settings')
   updateSettings(
     @Param('id', ParseUUIDPipe) id: string,
@@ -93,6 +97,7 @@ export class CompanyController {
   }
 
   @ApiOperation({ summary: 'Actualizar el rol de un miembro' })
+  @ApiResponse({ status: 200, description: 'Edited company data' })
   @Patch(':id/members/:userId')
   updateMemberRole(
     @Param('id', ParseUUIDPipe) companyId: string,
@@ -113,7 +118,7 @@ export class CompanyController {
 
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update company logo' })
-  @ApiResponse({ status: 201, description: 'Logo subido correctamente' })
+  @ApiResponse({ status: 201, description: 'Logo successfully uploaded' })
   @Post(':companyId/logo')
   @UseInterceptors(FileInterceptor('logo'))
   async uploadLogo(

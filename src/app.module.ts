@@ -10,6 +10,7 @@ import { CategoriesModule } from './category/category.module';
 import { ProductsModule } from './product/product.module';
 import { SupplierModule } from './supplier/supplier.module';
 import { MailModule } from './mail/mail.module';
+import { CustomerModule } from './customer/customer.module';
 
 @Module({
   imports: [
@@ -20,7 +21,8 @@ import { MailModule } from './mail/mail.module';
     CategoriesModule,
     ProductsModule,
     SupplierModule,
-    MailModule
+    MailModule,
+    CustomerModule,
   ],
   controllers: [AppController],
   providers: [AppService, SeedService],

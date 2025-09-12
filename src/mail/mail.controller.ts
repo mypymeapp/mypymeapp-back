@@ -1,12 +1,17 @@
 import { Controller, Post, Body } from '@nestjs/common';
 import { EmailService } from './mail.service';
+import { ApiOperation } from '@nestjs/swagger';
 
 @Controller('mail')
 export class MailController {
-    constructor(private readonly mailService: EmailService) {}
+  constructor(private readonly mailService: EmailService) {}
 
-    @Post('send')
-    async sendTestEmail(@Body() body: { to: string; subject: string; text: string }) {
-        return this.mailService.sendEmail(body.to, body.subject, body.text);
-    }
+  @ApiOperation({ summary: 'Send email' })
+  @Post('send')
+  async sendTestEmail(
+    @Body() body: { to: string; subject: string; text: string },
+  ) {
+    return this.mailService.sendEmail(body.to, body.subject, body.text);
+  }
 }
+
