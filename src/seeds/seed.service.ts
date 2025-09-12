@@ -6,6 +6,7 @@ import { CompanySeed } from './company.seed';
 import { CategorySeed } from './category.seed';
 import { ProductSeed } from './product.seed';
 import { SupplierSeed } from './supplier.seed';
+import { CustomerSeed } from './customer.seed';
 
 @Injectable()
 export class SeedService implements OnModuleInit {
@@ -26,6 +27,8 @@ export class SeedService implements OnModuleInit {
     await productSeed.run();
     const supplierSeed = new SupplierSeed(this.prisma);
     await supplierSeed.run();
+    const customerSeed = new CustomerSeed(this.prisma);
+    await customerSeed.run();
   }
 }
 
