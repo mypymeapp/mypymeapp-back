@@ -13,18 +13,12 @@ import { CreateStockDto } from './dto/create-stock.dto';
 @ApiTags('Stock')
 @Controller('stock')
 export class StockController {
-  constructor(private readonly stockService: StockService) {}
+    constructor(private readonly stockService: StockService) {}
 
-  @Post()
-  @ApiOperation({ summary: 'Register stock movement' })
-  create(@Body() dto: CreateStockDto) {
-    return this.stockService.create(dto);
-  }
-
-  @Get(':companyId')
-  @ApiOperation({ summary: 'Get company stock movement' })
-  findAll(@Param('companyId', ParseUUIDPipe) companyId: string) {
-    return this.stockService.findAll(companyId);
-  }
+    @Get(':companyId')
+    @ApiOperation({ summary: 'Get company stock movement' })
+    findAll(@Param('companyId', ParseUUIDPipe) companyId: string) {
+        return this.stockService.findAll(companyId);
+    }
 }
 
