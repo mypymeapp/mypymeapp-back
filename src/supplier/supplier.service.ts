@@ -6,6 +6,7 @@ import {
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateSupplierDto } from './dto/create-supplier.dto';
 import { randomUUID } from 'crypto';
+import { UpdateSupplierDto } from './dto/update-supplier.dto';
 
 @Injectable()
 export class SupplierService {
@@ -106,6 +107,33 @@ export class SupplierService {
           some: { companyId },
         },
       },
+    });
+  }
+
+  async updateSupplier(supplierId: string, data: UpdateSupplierDto) {
+    const supplier = await this.prisma.supplier.findUnique({
+      where: { id: supplierId },
+    });
+    if (!supplier) throw new NotFoundException('Supplier not found');
+
+    return this.prisma.supplier.update({
+      where: { id: supplierId },
+      data,
+    });
+  }
+
+  async deleteSupplier(supplierId: string) {
+    const supplier = await this.prisma.supplier.findUnique({
+      where: { id: supplierId },
+    });
+    if (!supplier) throw new NotFoundException('Supplier not found');
+
+    await this.prisma.companySupplier.deleteMany({
+      where: { supplierId },
+    });
+
+    return this.prisma.supplier.delete({
+      where: { id: supplierId },
     });
   }
 }
