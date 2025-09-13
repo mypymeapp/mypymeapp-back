@@ -5,16 +5,11 @@ import { UsersService } from 'src/users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'prisma/prisma.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { ConfigModule } from '@nestjs/config';
-import googleOauthConfig from './utils/google-oauth.config';
-import { GoogleStrategy } from './strategies/google.strategy';
 import { AuthLib } from './utils/auth.lib';
 import { EmailService } from 'src/mail/mail.service';
 
 @Module({
-  imports: [
-    ConfigModule.forFeature(googleOauthConfig),
-  ],
+  imports: [],
   controllers: [AuthController],
   providers: [
     AuthService, 
@@ -22,7 +17,6 @@ import { EmailService } from 'src/mail/mail.service';
     JwtService, 
     PrismaService, 
     JwtAuthGuard,
-    GoogleStrategy,
     AuthLib, 
     EmailService
   ],
