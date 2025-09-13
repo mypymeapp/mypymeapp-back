@@ -5,36 +5,24 @@ import {
   Res,
   Get,
   UseGuards,
-  Req,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignupDto, SignupResponseDto } from 'src/auth/dto/signup.dto';
 import {
   ApiBody,
   ApiCreatedResponse,
-  ApiBearerAuth,
   ApiOperation,
+  ApiCookieAuth,
 } from '@nestjs/swagger';
 import { SigninDto, SigninResponseDto } from 'src/auth/dto/signin.dto';
-import type { Request, Response } from 'express';
+import type { Response } from 'express';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import {
   GetCurrentUser,
   type CurrentUser,
 } from './decorators/current-user.decorator';
-import { Public } from './decorators/public.decorator';
 import { ApiTags } from '@nestjs/swagger';
-import { GoogleAuthGuard } from './guards/google-auth/google-auth.guard';
-
-// Interface to extend Express Request with user property from Passport.js
-interface RequestWithUser extends Request {
-  user: {
-    id: string;
-    name: string;
-    email: string;
-    avatarUrl?: string;
-  };
-}
+import { CreateGoogleDto, ResponseGoogleDto } from './dto/google.dto';
 
 @Controller('auth')
 @ApiTags('Authentications')
@@ -60,6 +48,17 @@ export class AuthController {
     return this.authService.signIn(dto, res);
   }
 
+  @ApiBody({ type: CreateGoogleDto })
+  @ApiCreatedResponse({ type: ResponseGoogleDto })
+  @ApiOperation({ summary: 'User login with Google' })
+  @Post('login/google')
+  async loginWithGoogle(
+    @Body() dto: CreateGoogleDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    return this.authService.signInWithGoogle(dto, res);
+  }
+
   @ApiOperation({ summary: 'User logout' })
   @Post('logout')
   async logout(@Res({ passthrough: true }) res: Response) {
@@ -67,7 +66,7 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @ApiCookieAuth()
   @ApiOperation({ summary: 'Get user profile' })
   @Get('profile')
   async getProfile(@GetCurrentUser() user: CurrentUser) {
@@ -75,20 +74,6 @@ export class AuthController {
       message: 'Perfil obtenido exitosamente',
       user,
     };
-  }
-
-  @Public()
-  @UseGuards(GoogleAuthGuard)
-  @ApiOperation({ summary: 'Google login' })
-  @Get('google/login')
-  async googleLogin() {}
-
-  @Public()
-  @UseGuards(GoogleAuthGuard)
-  @Get('google/callback')
-  async googleCallback(@Req() req: RequestWithUser, @Res() res: Response) {
-    await this.authService.signInWithGoogleUser(req.user, res);
-    res.redirect('/');
   }
 }
 

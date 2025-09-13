@@ -4,7 +4,8 @@ import { JwtService } from '@nestjs/jwt';
 import { Response } from 'express';
 import { SigninDto } from '../dto/signin.dto';
 import { PrismaService } from 'prisma/prisma.service';
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
+import { CreateGoogleDto } from '../dto/google.dto';
 
 @Injectable()
 export class AuthLib {
@@ -30,40 +31,32 @@ export class AuthLib {
     return { user, company };
   }
 
-  async findUserByEmail(email: string) {
-    try {
-      const user = await this.prisma.user.findUnique({
-        where: { email },
-        include: { companies: true },
+  async validateUserGoogle(data: CreateGoogleDto) {
+    const user = await this.prisma.user.findUnique({
+      where: { email: data.email },
+      include: {
+        companies: true,
+      },
+    });
+    let company: Company | null = null;
+    if (user?.companies?.length && user.companies.length > 0) {
+      company = await this.prisma.company.findUnique({
+        where: { id: user.companies[0].companyId },
       });
-      return user;
-    } catch (error) {
-      console.error('Database error in findUserByEmail:', error);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      try {
-        const user = await this.prisma.user.findUnique({
-          where: { email },
-          include: {
-            companies: true,
-          },
-        });
-        const company = await this.prisma.company.findUnique({
-          where: { id: user?.companies[0].companyId },
-        });
-        return { user, company };
-      } catch (retryError) {
-        console.error('Database retry failed in findUserByEmail:', retryError);
-        throw retryError;
-      }
     }
+
+    return { user, company };
   }
+
   async comparePassword(password: string, hash: string) {
     const compare = await bcrypt.compare(password, hash);
     return compare;
   }
+
   async hashPassword(password: string) {
     return await bcrypt.hash(password, 10);
   }
+
   async generateToken(user: User) {
     const payload = {
       id: user.id,
@@ -75,6 +68,7 @@ export class AuthLib {
       expiresIn: '8h',
     });
   }
+
   async generateRefreshToken(user: User) {
     const payload = {
       id: user.id,
@@ -86,6 +80,7 @@ export class AuthLib {
       expiresIn: '7d',
     });
   }
+
   async addCookie(res: Response, token: string) {
     res.cookie('auth-token', token, {
       httpOnly: true,
