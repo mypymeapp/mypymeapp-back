@@ -1,14 +1,17 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseUUIDPipe,
   Post,
+  Put,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { SupplierService } from './supplier.service';
 import { CreateSupplierDto } from './dto/create-supplier.dto';
+import { UpdateSupplierDto } from './dto/update-supplier.dto';
 
 @ApiTags('Suppliers')
 @Controller('supplier')
@@ -34,6 +37,23 @@ export class SupplierController {
   @ApiResponse({ status: 200, description: 'Supplier details' })
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.supplierService.getSupplierById(id);
+  }
+
+  @Put(':id')
+  @ApiOperation({ summary: 'Update supplier by id' })
+  @ApiResponse({ status: 200, description: 'Supplier updated successfully' })
+  update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateSupplierDto,
+  ) {
+    return this.supplierService.updateSupplier(id, dto);
+  }
+
+  @Delete(':id')
+  @ApiOperation({ summary: 'Delete supplier by id' })
+  @ApiResponse({ status: 200, description: 'Supplier deleted successfully' })
+  remove(@Param('id', ParseUUIDPipe) id: string) {
+    return this.supplierService.deleteSupplier(id);
   }
 }
 
