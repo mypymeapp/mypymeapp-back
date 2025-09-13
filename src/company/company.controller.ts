@@ -16,6 +16,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CompanyService } from './company.service';
+import { SupplierService } from 'src/supplier/supplier.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 import { UpdateSettingsDto } from './dto/update-settings.dto';
@@ -31,7 +32,10 @@ import {
 @ApiTags('Companies')
 @Controller('companies')
 export class CompanyController {
-    constructor(private readonly companyService: CompanyService) {}
+  constructor(
+    private readonly companyService: CompanyService,
+    private readonly supplierService: SupplierService,
+  ) {}
 
   @ApiOperation({ summary: 'Create new company' })
   @ApiResponse({ status: 201, description: 'Company data' })
@@ -54,6 +58,13 @@ export class CompanyController {
     return this.companyService.getCompanyById(id);
   }
 
+  @ApiOperation({ summary: 'Get suppliers of a company' })
+  @ApiResponse({ status: 200, description: 'List of suppliers for a company' })
+  @Get(':id/suppliers')
+  async getSuppliersByCompany(@Param('id', ParseUUIDPipe) companyId: string) {
+    return this.supplierService.getSuppliersByCompany(companyId);
+  }
+
   @ApiOperation({ summary: 'Update company data' })
   @ApiResponse({ status: 200, description: 'Edited company data' })
   @Put(':id')
@@ -71,11 +82,11 @@ export class CompanyController {
     return this.companyService.deleteCompany(id);
   }
 
-    @ApiOperation({ summary: 'Get company settings' })
-    @Get(':id/settings')
-    getSettings(@Param('id', ParseUUIDPipe) id: string) {
-      return this.companyService.getSettings(id);
-    }
+  @ApiOperation({ summary: 'Get company settings' })
+  @Get(':id/settings')
+  getSettings(@Param('id', ParseUUIDPipe) id: string) {
+    return this.companyService.getSettings(id);
+  }
 
   @ApiOperation({ summary: 'Update company settings' })
   @ApiResponse({ status: 200, description: 'Edited company data' })
@@ -87,14 +98,14 @@ export class CompanyController {
     return this.companyService.updateSettings(id, body);
   }
 
-    @ApiOperation({ summary: 'Add member to a company' })
-    @Post(':id/members')
-    addMember(
-      @Param('id', ParseUUIDPipe) companyId: string,
-      @Body() body: { userId: string; role: Role },
-    ) {
-      return this.companyService.addMember(companyId, body.userId, body.role);
-    }
+  @ApiOperation({ summary: 'Add member to a company' })
+  @Post(':id/members')
+  addMember(
+    @Param('id', ParseUUIDPipe) companyId: string,
+    @Body() body: { userId: string; role: Role },
+  ) {
+    return this.companyService.addMember(companyId, body.userId, body.role);
+  }
 
   @ApiOperation({ summary: 'Actualizar el rol de un miembro' })
   @ApiResponse({ status: 200, description: 'Edited company data' })
@@ -121,7 +132,6 @@ export class CompanyController {
   async getInventory(@Param('id', ParseUUIDPipe) companyId: string) {
     return this.companyService.getInventory(companyId);
   }
-
 
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update company logo' })
