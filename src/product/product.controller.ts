@@ -7,6 +7,8 @@ import {
   ParseUUIDPipe,
   Post,
   Put,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ProductsService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -14,6 +16,8 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { ApiTags, ApiResponse, ApiOperation } from '@nestjs/swagger';
 import { StockService } from 'src/stock/stock.service';
 import { CreateStockDto } from 'src/stock/dto/create-stock.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { FilesService } from '../files/files.service';
 
 @ApiTags('Products')
 @Controller('products')
@@ -21,6 +25,7 @@ export class ProductsController {
   constructor(
     private readonly productsService: ProductsService,
     private readonly stockService: StockService,
+    private readonly fileService: FilesService, 
   ) {}
 
   @ApiOperation({ summary: 'Create new product' })
@@ -73,6 +78,16 @@ export class ProductsController {
   @ApiOperation({ summary: 'Listar movimientos de stock de un producto' })
   async getStockMovements(@Param('id', ParseUUIDPipe) productId: string) {
     return this.stockService.findByProduct(productId);
+  }
+
+  @Post(':id/image')
+  @ApiOperation({ summary: 'Upload product image' })
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadImage(
+    @Param('id', ParseUUIDPipe) productId: string,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    return this.fileService.uploadProductImage(productId, file);
   }
 }
 
