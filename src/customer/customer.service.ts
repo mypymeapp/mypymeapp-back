@@ -45,5 +45,19 @@ export class CustomerService {
 
     return customer;
   }
+
+  async getCustomersByCompany(companyId: string) {
+    const company = await this.prisma.company.findUnique({
+      where: { id: companyId },
+    });
+    if (!company) {
+      throw new NotFoundException(`Company with id ${companyId} not found`);
+    }
+
+    return this.prisma.customer.findMany({
+      where: { companyId },
+      include: { company: true },
+    });
+  }
 }
 

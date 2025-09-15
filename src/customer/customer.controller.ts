@@ -40,5 +40,13 @@ export class CustomerController {
   async findOne(@Param('id') id: string) {
     return this.customerService.getCustomerById(id);
   }
+
+  @ApiOperation({ summary: 'Get a customer by Company ID' })
+  @ApiResponse({ status: 200, description: 'Customer details' })
+  @ApiResponse({ status: 404, description: 'Company not found' })
+  @Get(':companyId/customers')
+  async getCompanyCustomers(@Param('companyId') companyId: string) {
+    return this.customerService.getCustomersByCompany(companyId);
+  }
 }
 
