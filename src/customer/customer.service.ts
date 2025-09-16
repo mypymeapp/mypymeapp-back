@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateCustomerDto } from './dto/create-customer.dto';
+import { UpdateCustomerDto } from './dto/update-customer.dto';
 
 @Injectable()
 export class CustomerService {
@@ -57,6 +58,43 @@ export class CustomerService {
     return this.prisma.customer.findMany({
       where: { companyId },
       include: { company: true },
+    });
+  }
+
+  async updateCustomer(id: string, data: UpdateCustomerDto) {
+    // validar que exista
+    const existing = await this.prisma.customer.findUnique({ where: { id } });
+    if (!existing) {
+      throw new NotFoundException(`Customer with id ${id} not found`);
+    }
+
+    if (data.companyId) {
+      const company = await this.prisma.company.findUnique({
+        where: { id: data.companyId },
+      });
+      if (!company) {
+        throw new NotFoundException(
+          `Company with id ${data.companyId} not found`,
+        );
+      }
+    }
+
+    return this.prisma.customer.update({
+      where: { id },
+      data,
+      include: { company: true },
+    });
+  }
+
+  async deleteCustomer(id: string) {
+    const customer = await this.prisma.customer.findUnique({ where: { id } });
+    if (!customer) {
+      throw new NotFoundException(`Customer with id ${id} not found`);
+    }
+
+    return this.prisma.customer.delete({
+      where: { id },
+      select: { id: true, name: true, email: true },
     });
   }
 }
