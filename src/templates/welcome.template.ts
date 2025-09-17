@@ -1,3 +1,4 @@
+//Welcome mail
 export const welcomeTemplate = (name: string) => `
 <!DOCTYPE html>
 <html lang="es">
@@ -14,7 +15,7 @@ export const welcomeTemplate = (name: string) => `
       text-align:center; background:#2c3e50; color:#fff; padding:20px; border-radius:8px 8px 0 0;
     }
     .header img {
-      max-height:60px; margin-bottom:10px;
+      height:100px; width:auto; margin-bottom:10px;
     }
     .content { padding:20px; color:#333; }
     .footer {
@@ -26,8 +27,8 @@ export const welcomeTemplate = (name: string) => `
   <div class="container">
     <div class="header">
       <!-- Logo -->
-      <img src="https://res.cloudinary.com/dnoakcx0v/image/upload/v1758119070/logo-light_fvsxkl.webp" alt="Logo MyPymeApp" />
-      <h1>¡Bienvenido a MyPymeApp!</h1>
+      <img src="https://res.cloudinary.com/dnoakcx0v/image/upload/v1758124300/logo-dark_wt62ll.png" alt="Logo MyPymeApp" />
+      <h1>¡Bienvenido!</h1>
     </div>
     <div class="content">
       <h2>Hola ${name} 👋</h2>
