@@ -32,8 +32,23 @@ export const welcomeTemplate = (name: string) => `
     <div class="content">
       <h2>Hola ${name} 👋</h2>
       <p>
-        Gracias por registrarte en <strong>MyPymeApp</strong>. Nos alegra tenerte a bordo. 
-        Aquí podrás gestionar y hacer crecer tu negocio con nuestras herramientas.
+        <p>
+  Gracias por registrarte en <strong>MyPymeApp</strong>. Nos alegra tenerte a bordo. 
+  Aquí podrás gestionar y hacer crecer tu negocio con nuestras herramientas.
+</p>
+<p>
+  Desde ahora contarás con un panel intuitivo para administrar tus clientes, productos y servicios, 
+  recibir reportes en tiempo real y optimizar tus procesos. 
+</p>
+<p>
+  También iremos enviándote consejos y actualizaciones para que aproveches al máximo cada función de la plataforma. 
+  Si necesitas ayuda, nuestro equipo de soporte está listo para acompañarte en cada paso.
+</p>
+<p>
+  ¡Bienvenido a la comunidad de emprendedores y empresas que confían en <strong>MyPymeApp</strong> 
+  para impulsar su crecimiento!
+</p>
+
       </p>
     </div>
     <div class="footer">
