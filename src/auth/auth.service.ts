@@ -90,9 +90,16 @@ export class AuthService {
           avatarUrl: dto.avatarUrl,
         },
       });
+
+      try {
+        await this.emailService.sendWelcomeEmail(user.name, user.email);
+      } catch (err) {
+        console.error('Error enviando correo de bienvenida Google:', err);
+      }
+
       const token = await this.authLib.generateToken(user);
       this.authLib.addCookie(res, token);
-      
+
       return {
         token: token,
         user: {
@@ -135,13 +142,19 @@ export class AuthService {
       });
 
       // Enviar correo de bienvenida (no bloquea el registro si falla)
+      // try {
+      //   await this.emailService.sendEmail(
+      //     user.email,
+      //     '¡Bienvenido a MyPyme!',
+      //     `<h1>Hola ${user.name} 👋</h1>
+      //     <p>Gracias por registrarte en MyPyme. ¡Esperamos que disfrutes nuestra plataforma!</p>`,
+      //   );
+      // } catch (err) {
+      //   console.error('Error enviando correo de bienvenida:', err);
+      // }
+
       try {
-        await this.emailService.sendEmail(
-          user.email,
-          '¡Bienvenido a MyPyme!',
-          `<h1>Hola ${user.name} 👋</h1>
-          <p>Gracias por registrarte en MyPyme. ¡Esperamos que disfrutes nuestra plataforma!</p>`,
-        );
+        await this.emailService.sendWelcomeEmail(user.name, user.email);
       } catch (err) {
         console.error('Error enviando correo de bienvenida:', err);
       }
@@ -165,3 +178,4 @@ export class AuthService {
     };
   }
 }
+
