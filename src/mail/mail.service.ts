@@ -1,6 +1,7 @@
 import * as nodemailer from 'nodemailer';
 import { ConfigService } from '@nestjs/config';
 import { Injectable } from '@nestjs/common';
+import { welcomeTemplate } from 'src/templates/welcome.template';
 
 @Injectable()
 export class EmailService {
@@ -32,7 +33,13 @@ export class EmailService {
       messageId: info.messageId,
     };
   }
+
+  async sendWelcomeEmail(name: string, email: string) {
+    return this.sendEmail(
+      email,
+      '¡Bienvenido a MyPyme!',
+      welcomeTemplate(name),
+    );
+  }
 }
-
-
 
