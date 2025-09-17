@@ -13,11 +13,10 @@ export const welcomeTemplate = (name: string) => `
     .header {
       text-align:center; background:#2c3e50; color:#fff; padding:20px; border-radius:8px 8px 0 0;
     }
-    .content { padding:20px; color:#333; }
-    .btn {
-      display:inline-block; margin-top:20px; padding:10px 20px; background:#27ae60; 
-      color:#fff; text-decoration:none; border-radius:4px;
+    .header img {
+      max-height:60px; margin-bottom:10px;
     }
+    .content { padding:20px; color:#333; }
     .footer {
       text-align:center; font-size:12px; color:#aaa; margin-top:20px;
     }
@@ -26,16 +25,19 @@ export const welcomeTemplate = (name: string) => `
 <body>
   <div class="container">
     <div class="header">
-      <h1>¡Bienvenido a MyPyme!</h1>
+      <!-- Logo -->
+      <img src="https://res.cloudinary.com/dnoakcx0v/image/upload/v1758119070/logo-light_fvsxkl.webp" alt="Logo MyPymeApp" />
+      <h1>¡Bienvenido a MyPymeApp!</h1>
     </div>
     <div class="content">
       <h2>Hola ${name} 👋</h2>
-      <p>Gracias por registrarte en <strong>MyPyme</strong>. Nos alegra tenerte a bordo. 
-         Aquí podrás gestionar y hacer crecer tu negocio con nuestras herramientas.</p>
-      <a href="https://mipyme.app" class="btn">Ir a MyPyme</a>
+      <p>
+        Gracias por registrarte en <strong>MyPymeApp</strong>. Nos alegra tenerte a bordo. 
+        Aquí podrás gestionar y hacer crecer tu negocio con nuestras herramientas.
+      </p>
     </div>
     <div class="footer">
-      © ${new Date().getFullYear()} MyPyme. Todos los derechos reservados.
+      © ${new Date().getFullYear()} MyPymeApp. Todos los derechos reservados.
     </div>
   </div>
 </body>
