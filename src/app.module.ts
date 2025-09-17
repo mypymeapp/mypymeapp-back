@@ -11,6 +11,7 @@ import { ProductsModule } from './product/product.module';
 import { SupplierModule } from './supplier/supplier.module';
 import { MailModule } from './mail/mail.module';
 import { CustomerModule } from './customer/customer.module';
+import { MercadoPagoModule } from './payments/mercadopago.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { CustomerModule } from './customer/customer.module';
     SupplierModule,
     MailModule,
     CustomerModule,
+    MercadoPagoModule,
   ],
   controllers: [AppController],
   providers: [AppService, SeedService],
