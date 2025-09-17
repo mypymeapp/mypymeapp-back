@@ -1,3 +1,4 @@
+//Welcome mail
 export const welcomeTemplate = (name: string) => `
 <!DOCTYPE html>
 <html lang="es">
@@ -13,11 +14,10 @@ export const welcomeTemplate = (name: string) => `
     .header {
       text-align:center; background:#2c3e50; color:#fff; padding:20px; border-radius:8px 8px 0 0;
     }
-    .content { padding:20px; color:#333; }
-    .btn {
-      display:inline-block; margin-top:20px; padding:10px 20px; background:#27ae60; 
-      color:#fff; text-decoration:none; border-radius:4px;
+    .header img {
+      height:100px; width:auto; margin-bottom:10px;
     }
+    .content { padding:20px; color:#333; }
     .footer {
       text-align:center; font-size:12px; color:#aaa; margin-top:20px;
     }
@@ -26,16 +26,34 @@ export const welcomeTemplate = (name: string) => `
 <body>
   <div class="container">
     <div class="header">
-      <h1>¡Bienvenido a MyPyme!</h1>
+      <!-- Logo -->
+      <img src="https://res.cloudinary.com/dnoakcx0v/image/upload/v1758124300/logo-dark_wt62ll.png" alt="Logo MyPymeApp" />
+      <h1>¡Bienvenido!</h1>
     </div>
     <div class="content">
       <h2>Hola ${name} 👋</h2>
-      <p>Gracias por registrarte en <strong>MyPyme</strong>. Nos alegra tenerte a bordo. 
-         Aquí podrás gestionar y hacer crecer tu negocio con nuestras herramientas.</p>
-      <a href="https://mipyme.app" class="btn">Ir a MyPyme</a>
+      <p>
+        <p>
+  Gracias por registrarte en <strong>MyPymeApp</strong>. Nos alegra tenerte a bordo. 
+  Aquí podrás gestionar y hacer crecer tu negocio con nuestras herramientas.
+</p>
+<p>
+  Desde ahora contarás con un panel intuitivo para administrar tus clientes, productos y servicios, 
+  recibir reportes en tiempo real y optimizar tus procesos. 
+</p>
+<p>
+  También iremos enviándote consejos y actualizaciones para que aproveches al máximo cada función de la plataforma. 
+  Si necesitas ayuda, nuestro equipo de soporte está listo para acompañarte en cada paso.
+</p>
+<p>
+  ¡Bienvenido a la comunidad de emprendedores y empresas que confían en <strong>MyPymeApp</strong> 
+  para impulsar su crecimiento!
+</p>
+
+      </p>
     </div>
     <div class="footer">
-      © ${new Date().getFullYear()} MyPyme. Todos los derechos reservados.
+      © ${new Date().getFullYear()} MyPymeApp. Todos los derechos reservados.
     </div>
   </div>
 </body>
