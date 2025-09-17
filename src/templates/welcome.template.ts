@@ -1,3 +1,4 @@
+//Welcome mail
 export const welcomeTemplate = (name: string) => `
 <!DOCTYPE html>
 <html lang="es">
