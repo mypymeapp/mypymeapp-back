@@ -52,6 +52,7 @@ export class AuthService {
           id: result.user.id,
           name: result.user.name,
           email: result.user.email,
+          avatarUrl: result.user.avatarUrl,
           company: {
             id: result.company?.id,
             name: result.company?.name,
@@ -140,18 +141,6 @@ export class AuthService {
           avatarUrl: dto.avatarUrl,
         },
       });
-
-      // Enviar correo de bienvenida (no bloquea el registro si falla)
-      // try {
-      //   await this.emailService.sendEmail(
-      //     user.email,
-      //     '¡Bienvenido a MyPyme!',
-      //     `<h1>Hola ${user.name} 👋</h1>
-      //     <p>Gracias por registrarte en MyPyme. ¡Esperamos que disfrutes nuestra plataforma!</p>`,
-      //   );
-      // } catch (err) {
-      //   console.error('Error enviando correo de bienvenida:', err);
-      // }
 
       try {
         await this.emailService.sendWelcomeEmail(user.name, user.email);
