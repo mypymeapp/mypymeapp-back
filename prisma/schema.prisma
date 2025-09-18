@@ -195,7 +195,7 @@ model Supplier {
   contactName     String
   address         String
   country         Country
-  currency        Currency[]
+  currency        String[]
   hasDebt         Boolean           @default(false)
   pendingGoods    Boolean           @default(false)
   categoryId      String
