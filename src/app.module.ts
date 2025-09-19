@@ -27,7 +27,7 @@ import { MercadoPagoModule } from './payments/mercadopago.module';
     MercadoPagoModule,
   ],
   controllers: [AppController],
-  providers: [AppService, SeedService],
+  providers: [AppService],
 })
 export class AppModule {}
 
