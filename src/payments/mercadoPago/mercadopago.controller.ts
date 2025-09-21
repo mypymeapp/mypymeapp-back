@@ -1,5 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
-import { MercadoPagoService } from './mercadopago.service';
+import { MercadoPagoService } from '../mercadoPago/mercadopago.service';
 
 @Controller('mp-test')
 export class MercadoPagoTestController {

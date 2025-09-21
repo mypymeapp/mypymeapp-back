@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import cookieParser from 'cookie-parser';
+import * as bodyParser from 'body-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -23,6 +24,12 @@ async function bootstrap() {
       docExpansion: 'none',
     },
   });
+
+     // ⚡ Para que Stripe funcione con webhooks
+  app.use(
+    '/payments/webhooks/stripe',
+    bodyParser.raw({ type: 'application/json' }), // importante: raw body
+  );
 
   app.use(cookieParser());
 
