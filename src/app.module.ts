@@ -11,7 +11,9 @@ import { ProductsModule } from './product/product.module';
 import { SupplierModule } from './supplier/supplier.module';
 import { MailModule } from './mail/mail.module';
 import { CustomerModule } from './customer/customer.module';
-import { MercadoPagoModule } from './payments/mercadopago.module';
+import { MercadoPagoModule } from './payments/mercadoPago/mercadopago.module';
+import { StripeModule } from './payments/stripe/stripe.module';
+
 
 @Module({
   imports: [
@@ -25,9 +27,10 @@ import { MercadoPagoModule } from './payments/mercadopago.module';
     MailModule,
     CustomerModule,
     MercadoPagoModule,
+    StripeModule
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, SeedService],
 })
 export class AppModule {}
 

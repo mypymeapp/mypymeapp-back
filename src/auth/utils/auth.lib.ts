@@ -57,17 +57,28 @@ export class AuthLib {
     return await bcrypt.hash(password, 10);
   }
 
-  async generateToken(user: User) {
-    const payload = {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-    };
-    return this.jwtService.sign(payload, {
-      secret: process.env.JWT_SECRET,
-      expiresIn: '8h',
-    });
-  }
+async generateToken(user: User) {
+      // Traer la primera compañía del usuario
+        const userWithCompany = await this.prisma.user.findUnique({
+            where: { id: user.id },
+            include: { companies: true },
+        });
+
+        const payload: any = {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+        };
+
+        if (userWithCompany?.companies?.length) {
+            payload.companyId = userWithCompany.companies[0].companyId;
+        }
+
+        return this.jwtService.sign(payload, {
+            secret: process.env.JWT_SECRET,
+            expiresIn: '8h',
+        });
+    }
 
   async generateRefreshToken(user: User) {
     const payload = {
