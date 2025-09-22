@@ -92,6 +92,7 @@ model Company {
   members             UserCompany[]
   customers           Customer[]
   transactions        Transaction[]
+  invoices            Invoice[]
   subscriptionStatus  SubscriptionStatus @default(FREE)
   subscriptionEndDate DateTime?
 }
@@ -144,6 +145,9 @@ model Product {
 
   company  Company   @relation(fields: [companyId], references: [id])
   category Category? @relation(fields: [categoryId], references: [id])
+
+  invoiceItems   InvoiceItem[]
+
 
   images         ProductImage[]   @relation("ProductToImages") // varias imágenes
   StockMovements StockMovements[]
@@ -219,6 +223,7 @@ model Customer {
   notes       String?
   companyId   String
   company     Company  @relation(fields: [companyId], references: [id])
+  invoices    Invoice[]
 }
 
 /// ================================
@@ -241,6 +246,36 @@ model Transaction {
   user    User?      @relation(fields: [userId], references: [id])
   company Company?   @relation(fields: [companyId], references: [id])
 }
+
+model Invoice {
+  id                String       @id @default(uuid())
+  number            String
+  issuedAt          DateTime     @default(now())
+  dueAt             DateTime
+  status            InvoiceStatus @default(PENDING)
+  total             Float
+
+  companyId         String
+  customerId        String
+
+  company           Company      @relation(fields: [companyId], references: [id])
+  customer          Customer     @relation(fields: [customerId], references: [id])
+  items             InvoiceItem[]
+}
+
+model InvoiceItem {
+  id          String  @id @default(uuid())
+  invoiceId   String
+  productId   String
+  description String
+  qty         Int
+  price       Float
+
+  invoice     Invoice @relation(fields: [invoiceId], references: [id])
+  product     Product @relation(fields: [productId], references: [id])
+}
+
+
 
 /// ================================
 /// Roles and enums
