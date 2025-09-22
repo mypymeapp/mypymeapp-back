@@ -34,6 +34,7 @@ export class AuthService {
   }
 
   async signIn(dto: SigninDto, res: Response) {
+    // Ahora result contendrá user, company y role
     const result = await this.authLib.validateUser(dto);
     if (!result.user) throw new ForbiddenException('Invalid credentials');
 
@@ -46,6 +47,7 @@ export class AuthService {
     try {
       const token = await this.authLib.generateToken(result.user);
       this.authLib.addCookie(res, token);
+
       return {
         token: token,
         user: {
@@ -53,13 +55,16 @@ export class AuthService {
           name: result.user.name,
           email: result.user.email,
           avatarUrl: result.user.avatarUrl,
+          role: result.role,
           company: {
             id: result.company?.id,
             name: result.company?.name,
+            subscriptionStatus: result.company?.subscriptionStatus,
           },
         },
       };
-    } catch {
+    } catch (error) {
+      console.error(error);
       throw new InternalServerErrorException('Internal server error');
     }
   }
