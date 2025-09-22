@@ -1,0 +1,156 @@
+[33m95536a8[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mdeveloper[m[33m, [m[1;31morigin/developer[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{0}: reset: moving to HEAD~1
+[33mddb3e3a[m HEAD@{1}: commit: Mensaje descriptivo
+[33m95536a8[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mdeveloper[m[33m, [m[1;31morigin/developer[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{2}: pull origin developer: Fast-forward
+[33m63031f0[m[33m ([m[1;31morigin/feat/notification_mail_stripe[m[33m, [m[1;32mfeat/notification_mail_stripe[m[33m)[m HEAD@{3}: checkout: moving from feat/notification_mail_stripe to developer
+[33m63031f0[m[33m ([m[1;31morigin/feat/notification_mail_stripe[m[33m, [m[1;32mfeat/notification_mail_stripe[m[33m)[m HEAD@{4}: checkout: moving from developer to feat/notification_mail_stripe
+[33m63031f0[m[33m ([m[1;31morigin/feat/notification_mail_stripe[m[33m, [m[1;32mfeat/notification_mail_stripe[m[33m)[m HEAD@{5}: pull origin developer: Fast-forward
+[33m9b52336[m HEAD@{6}: checkout: moving from feat/pasarela_pagos to developer
+[33m67d9c1b[m[33m ([m[1;31morigin/feat/pasarela_pagos[m[33m, [m[1;32mfeat/pasarela_pagos[m[33m)[m HEAD@{7}: checkout: moving from developer to feat/pasarela_pagos
+[33m9b52336[m HEAD@{8}: checkout: moving from feat/pasarela_pagos to developer
+[33m67d9c1b[m[33m ([m[1;31morigin/feat/pasarela_pagos[m[33m, [m[1;32mfeat/pasarela_pagos[m[33m)[m HEAD@{9}: checkout: moving from developer to feat/pasarela_pagos
+[33m9b52336[m HEAD@{10}: checkout: moving from feat/pasarela_pagos to developer
+[33m67d9c1b[m[33m ([m[1;31morigin/feat/pasarela_pagos[m[33m, [m[1;32mfeat/pasarela_pagos[m[33m)[m HEAD@{11}: checkout: moving from developer to feat/pasarela_pagos
+[33m9b52336[m HEAD@{12}: checkout: moving from feat/pasarela_pagos to developer
+[33m67d9c1b[m[33m ([m[1;31morigin/feat/pasarela_pagos[m[33m, [m[1;32mfeat/pasarela_pagos[m[33m)[m HEAD@{13}: commit: Add Pasarela de pagos_Stripe
+[33m9b52336[m HEAD@{14}: checkout: moving from developer to feat/pasarela_pagos
+[33m9b52336[m HEAD@{15}: pull origin developer: Fast-forward
+[33me1cfb29[m HEAD@{16}: pull origin developer: Fast-forward
+[33m7cb7381[m HEAD@{17}: pull origin developer: Fast-forward
+[33m5aae832[m HEAD@{18}: checkout: moving from feat/new-route-product_fileUpload to developer
+[33mec29040[m[33m ([m[1;31morigin/feat/new-route-product_fileUpload[m[33m, [m[1;32mfeat/new-route-product_fileUpload[m[33m)[m HEAD@{19}: checkout: moving from developer to feat/new-route-product_fileUpload
+[33m5aae832[m HEAD@{20}: checkout: moving from feat/new-route-product_fileUpload to developer
+[33mec29040[m[33m ([m[1;31morigin/feat/new-route-product_fileUpload[m[33m, [m[1;32mfeat/new-route-product_fileUpload[m[33m)[m HEAD@{21}: commit: nueva ruta POST /products/uuid-del-producto/image
+[33m5aae832[m HEAD@{22}: checkout: moving from developer to feat/new-route-product_fileUpload
+[33m5aae832[m HEAD@{23}: pull origin developer: Fast-forward
+[33med82505[m HEAD@{24}: checkout: moving from feat/mail-notification-available to developer
+[33m7b9ccda[m[33m ([m[1;31morigin/feat/mail-notification-available[m[33m, [m[1;32mfeat/mail-notification-available[m[33m)[m HEAD@{25}: commit: Notificacion mail disponible
+[33med82505[m HEAD@{26}: checkout: moving from developer to feat/mail-notification-available
+[33med82505[m HEAD@{27}: pull origin developer: Fast-forward
+[33m7dea87a[m HEAD@{28}: pull origin developer: Fast-forward
+[33m851c126[m HEAD@{29}: pull origin developer: Fast-forward
+[33ma30ae9a[m HEAD@{30}: pull origin developer: Fast-forward
+[33m6c5c134[m HEAD@{31}: pull origin developer: Fast-forward
+[33m03d7759[m HEAD@{32}: checkout: moving from feat/welcoming_mail to developer
+[33m46eb17b[m[33m ([m[1;31morigin/feat/welcoming_mail[m[33m, [m[1;32mfeat/welcoming_mail[m[33m)[m HEAD@{33}: checkout: moving from developer to feat/welcoming_mail
+[33m03d7759[m HEAD@{34}: checkout: moving from feat/welcoming_mail to developer
+[33m46eb17b[m[33m ([m[1;31morigin/feat/welcoming_mail[m[33m, [m[1;32mfeat/welcoming_mail[m[33m)[m HEAD@{35}: checkout: moving from developer to feat/welcoming_mail
+[33m03d7759[m HEAD@{36}: checkout: moving from feat/welcoming_mail to developer
+[33m46eb17b[m[33m ([m[1;31morigin/feat/welcoming_mail[m[33m, [m[1;32mfeat/welcoming_mail[m[33m)[m HEAD@{37}: commit: add welcome mail
+[33m03d7759[m HEAD@{38}: checkout: moving from developer to feat/welcoming_mail
+[33m03d7759[m HEAD@{39}: pull origin developer: Fast-forward
+[33mac17ba7[m HEAD@{40}: checkout: moving from fix/correccion_rutas_stock_products to developer
+[33m751c947[m[33m ([m[1;31morigin/fix/correccion_rutas_stock_products[m[33m, [m[1;32mfix/correccion_rutas_stock_products[m[33m)[m HEAD@{41}: checkout: moving from developer to fix/correccion_rutas_stock_products
+[33mac17ba7[m HEAD@{42}: checkout: moving from fix/correccion_rutas_stock_products to developer
+[33m751c947[m[33m ([m[1;31morigin/fix/correccion_rutas_stock_products[m[33m, [m[1;32mfix/correccion_rutas_stock_products[m[33m)[m HEAD@{43}: commit: Correccion de rutas product_stock
+[33mac17ba7[m HEAD@{44}: checkout: moving from developer to fix/correccion_rutas_stock_products
+[33mac17ba7[m HEAD@{45}: pull origin developer: Fast-forward
+[33m0041910[m HEAD@{46}: checkout: moving from feat/nueva_ruta_company_inventory to developer
+[33m0daa07a[m[33m ([m[1;31morigin/feat/nueva_ruta_company_inventory[m[33m, [m[1;32mfeat/nueva_ruta_company_inventory[m[33m)[m HEAD@{47}: checkout: moving from developer to feat/nueva_ruta_company_inventory
+[33m0041910[m HEAD@{48}: pull origin developer: Fast-forward
+[33mde09eb2[m HEAD@{49}: checkout: moving from feat/nueva_ruta_company_inventory to developer
+[33m0daa07a[m[33m ([m[1;31morigin/feat/nueva_ruta_company_inventory[m[33m, [m[1;32mfeat/nueva_ruta_company_inventory[m[33m)[m HEAD@{50}: commit: nueva ruta companyInventory
+[33m0041910[m HEAD@{51}: pull origin developer: Fast-forward
+[33mb39118f[m HEAD@{52}: commit (merge): Merge branch 'developer' of https://github.com/mypymeapp/mypymeapp-back into developer
+[33md65ac21[m HEAD@{53}: checkout: moving from developer to feat/nueva_ruta_company_inventory
+[33mde09eb2[m HEAD@{54}: pull origin developer: Fast-forward
+[33mce18452[m HEAD@{55}: checkout: moving from feat/nueva_ruta_company_inventory to developer
+[33md65ac21[m HEAD@{56}: commit: nueva ruta companyInventory
+[33mce18452[m HEAD@{57}: checkout: moving from developer to feat/nueva_ruta_company_inventory
+[33mce18452[m HEAD@{58}: pull origin developer: Fast-forward
+[33m7a0d3af[m HEAD@{59}: pull origin developer: Fast-forward
+[33m1ab1f48[m HEAD@{60}: pull origin developer: Fast-forward
+[33mdc0a026[m HEAD@{61}: pull origin developer: Fast-forward
+[33mc2d0c80[m HEAD@{62}: checkout: moving from feat/notificacion-mailModule to developer
+[33m06fc2ee[m[33m ([m[1;31morigin/feat/notificacion-mailModule[m[33m, [m[1;32mfeat/notificacion-mailModule[m[33m)[m HEAD@{63}: checkout: moving from developer to feat/notificacion-mailModule
+[33mc2d0c80[m HEAD@{64}: checkout: moving from feat/notificacion-mailModule to developer
+[33m06fc2ee[m[33m ([m[1;31morigin/feat/notificacion-mailModule[m[33m, [m[1;32mfeat/notificacion-mailModule[m[33m)[m HEAD@{65}: commit: add mailModule
+[33mc2d0c80[m HEAD@{66}: checkout: moving from developer to feat/notificacion-mailModule
+[33mc2d0c80[m HEAD@{67}: pull origin developer: Merge made by the 'ort' strategy.
+[33m1b0ed8e[m HEAD@{68}: pull origin developer: Merge made by the 'ort' strategy.
+[33m2779fb2[m HEAD@{69}: merge feat/stockModule_+2_rutasNuevas_productModule: Merge made by the 'ort' strategy.
+[33m5ae487a[m HEAD@{70}: checkout: moving from feat/stockModule_+2_rutasNuevas_productModule to developer
+[33m9646717[m[33m ([m[1;31morigin/feat/stockModule_+2_rutasNuevas_productModule[m[33m, [m[1;32mfeat/stockModule_+2_rutasNuevas_productModule[m[33m)[m HEAD@{71}: commit: feat: agregar migración qty en Product
+[33m6403489[m HEAD@{72}: checkout: moving from developer to feat/stockModule_+2_rutasNuevas_productModule
+[33m5ae487a[m HEAD@{73}: commit: ajustes en prisma.service
+[33m9dc481c[m HEAD@{74}: checkout: moving from feat/stockModule_+2_rutasNuevas_productModule to developer
+[33m6403489[m HEAD@{75}: commit: feat: Se añade columna 'qty', stockModule y 2 nuevas rutas para el módulo de product
+[33m9dc481c[m HEAD@{76}: checkout: moving from developer to feat/stockModule_+2_rutasNuevas_productModule
+[33m9dc481c[m HEAD@{77}: checkout: moving from feat/stockModule_+2_rutasNuevas_productModule to developer
+[33m9dc481c[m HEAD@{78}: reset: moving to HEAD
+[33m9dc481c[m HEAD@{79}: checkout: moving from developer to feat/stockModule_+2_rutasNuevas_productModule
+[33m9dc481c[m HEAD@{80}: checkout: moving from feat/stockModule_+2_rutasNuevas_productModule to developer
+[33m9dc481c[m HEAD@{81}: checkout: moving from developer to feat/stockModule_+2_rutasNuevas_productModule
+[33m9dc481c[m HEAD@{82}: pull origin developer: Fast-forward
+[33m6688062[m HEAD@{83}: pull origin developer: Fast-forward
+[33mb3e14c6[m HEAD@{84}: pull origin developer: Fast-forward
+[33m32977ca[m HEAD@{85}: pull origin developer: Fast-forward
+[33mf588776[m HEAD@{86}: checkout: moving from feature/add-products-and-categories-module to developer
+[33maaaabd0[m[33m ([m[1;31morigin/feature/add-products-and-categories-module[m[33m, [m[1;32mfeature/add-products-and-categories-module[m[33m)[m HEAD@{87}: commit (merge): Merge branch 'developer' into feature/add-products-and-categories-module
+[33m6690197[m HEAD@{88}: checkout: moving from developer to feature/add-products-and-categories-module
+[33mf588776[m HEAD@{89}: pull origin developer: Fast-forward
+[33m4297c99[m HEAD@{90}: checkout: moving from feature/add-products-and-categories-module to developer
+[33m6690197[m HEAD@{91}: commit: add-category-and-product-modules
+[33m4297c99[m HEAD@{92}: checkout: moving from developer to feature/add-products-and-categories-module
+[33m4297c99[m HEAD@{93}: checkout: moving from developer to developer
+[33m4297c99[m HEAD@{94}: pull origin developer: Fast-forward
+[33m43a7a1a[m HEAD@{95}: pull origin developer: Fast-forward
+[33mbbe6e54[m HEAD@{96}: checkout: moving from fix/companyModule_create to developer
+[33m57d4f04[m[33m ([m[1;31morigin/fix/companyModule_create[m[33m, [m[1;32mfix/companyModule_create[m[33m)[m HEAD@{97}: commit: Se corrige createCompany
+[33mbbe6e54[m HEAD@{98}: checkout: moving from developer to fix/companyModule_create
+[33mbbe6e54[m HEAD@{99}: pull origin developer: Fast-forward
+[33mee19aae[m HEAD@{100}: reset: moving to HEAD
+[33mee19aae[m HEAD@{101}: checkout: moving from fix/passwword_hashpassworh to developer
+[33m38bab0b[m[33m ([m[1;31morigin/fix/passwword_hashpassworh[m[33m, [m[1;32mfix/passwword_hashpassworh[m[33m)[m HEAD@{102}: checkout: moving from developer to fix/passwword_hashpassworh
+[33mee19aae[m HEAD@{103}: checkout: moving from fix/passwword_hashpassworh to developer
+[33m38bab0b[m[33m ([m[1;31morigin/fix/passwword_hashpassworh[m[33m, [m[1;32mfix/passwword_hashpassworh[m[33m)[m HEAD@{104}: commit: update companyModule
+[33mee19aae[m HEAD@{105}: checkout: moving from developer to fix/passwword_hashpassworh
+[33mee19aae[m HEAD@{106}: pull origin developer: Fast-forward
+[33m7d744dd[m HEAD@{107}: checkout: moving from fix/passwordHash to developer
+[33m7937df9[m[33m ([m[1;31morigin/fix/passwordHash[m[33m, [m[1;32mfix/passwordHash[m[33m)[m HEAD@{108}: checkout: moving from developer to fix/passwordHash
+[33m7d744dd[m HEAD@{109}: checkout: moving from fix/passwordHash to developer
+[33m7937df9[m[33m ([m[1;31morigin/fix/passwordHash[m[33m, [m[1;32mfix/passwordHash[m[33m)[m HEAD@{110}: commit: feat: Agrega la migración para la columna mail en la tabla Company
+[33m7d744dd[m HEAD@{111}: checkout: moving from developer to fix/passwordHash
+[33m7d744dd[m HEAD@{112}: pull origin developer: Fast-forward
+[33m7261e13[m HEAD@{113}: checkout: moving from feat/companyModule to developer
+[33m970532f[m[33m ([m[1;31morigin/feat/companyModule[m[33m, [m[1;32mfeat/companyModule[m[33m)[m HEAD@{114}: checkout: moving from developer to feat/companyModule
+[33m7261e13[m HEAD@{115}: pull origin developer: Fast-forward
+[33m35fcf0f[m HEAD@{116}: checkout: moving from feat/companyModule to developer
+[33m970532f[m[33m ([m[1;31morigin/feat/companyModule[m[33m, [m[1;32mfeat/companyModule[m[33m)[m HEAD@{117}: commit: Se corrige o se actualiza CompanyModule
+[33m4cf90cf[m HEAD@{118}: checkout: moving from feat/feat/companyModule to feat/companyModule
+[33m0000fa3[m[33m ([m[1;32mfeat/feat/companyModule[m[33m)[m HEAD@{119}: checkout: moving from developer to feat/feat/companyModule
+[33m35fcf0f[m HEAD@{120}: checkout: moving from feat/feat/companyModule to developer
+[33m0000fa3[m[33m ([m[1;32mfeat/feat/companyModule[m[33m)[m HEAD@{121}: commit: Se agrega CompanyModule con todos sus componentes
+[33m35fcf0f[m HEAD@{122}: checkout: moving from developer to feat/feat/companyModule
+[33m35fcf0f[m HEAD@{123}: reset: moving to HEAD~1
+[33m7261e13[m HEAD@{124}: checkout: moving from feat/companyModule to developer
+[33m4cf90cf[m HEAD@{125}: commit: Se agrega CompanyModule
+[33m7261e13[m HEAD@{126}: checkout: moving from developer to feat/companyModule
+[33m7261e13[m HEAD@{127}: reset: moving to origin/developer
+[33m77fcb7c[m HEAD@{128}: checkout: moving from developer to developer
+[33m77fcb7c[m HEAD@{129}: commit (merge): Merge branch 'developer' and resolve conflicts
+[33m6c38ea6[m HEAD@{130}: merge dev: Merge made by the 'ort' strategy.
+[33m184b77a[m HEAD@{131}: pull origin developer: Merge made by the 'ort' strategy.
+[33mc730006[m HEAD@{132}: commit: fix updateSchema
+[33m9f77cf9[m HEAD@{133}: checkout: moving from dev to developer
+[33ma2838d3[m[33m ([m[1;31morigin/dev[m[33m, [m[1;32mdev[m[33m)[m HEAD@{134}: commit: schemaUpdate
+[33m8195173[m HEAD@{135}: pull origin developer: Fast-forward
+[33m27786e1[m HEAD@{136}: checkout: moving from feat/schemaUpdate to dev
+[33m413406a[m[33m ([m[1;31morigin/feat/schemaUpdate[m[33m, [m[1;32mfeat/schemaUpdate[m[33m)[m HEAD@{137}: merge developer: Merge made by the 'ort' strategy.
+[33m37c7e1c[m HEAD@{138}: checkout: moving from developer to feat/schemaUpdate
+[33m9f77cf9[m HEAD@{139}: pull origin developer: Fast-forward
+[33m69d6681[m HEAD@{140}: checkout: moving from feat/schemaUpdate to developer
+[33m37c7e1c[m HEAD@{141}: commit: schemaUpdate
+[33m69d6681[m HEAD@{142}: checkout: moving from developer to feat/schemaUpdate
+[33m69d6681[m HEAD@{143}: checkout: moving from schemaUpdate to developer
+[33m69d6681[m HEAD@{144}: checkout: moving from developer to schemaUpdate
+[33m69d6681[m HEAD@{145}: pull origin developer: Fast-forward
+[33m27786e1[m HEAD@{146}: checkout: moving from feat/authM-usersM-filesM to developer
+[33m6a0275c[m[33m ([m[1;31morigin/feat/authM-usersM-filesM[m[33m, [m[1;32mfeat/authM-usersM-filesM[m[33m)[m HEAD@{147}: checkout: moving from developer to feat/authM-usersM-filesM
+[33m27786e1[m HEAD@{148}: checkout: moving from feat/authM-usersM-filesM to developer
+[33m6a0275c[m[33m ([m[1;31morigin/feat/authM-usersM-filesM[m[33m, [m[1;32mfeat/authM-usersM-filesM[m[33m)[m HEAD@{149}: commit: auth-users-files
+[33m27786e1[m HEAD@{150}: checkout: moving from developer to feat/authM-usersM-filesM
+[33m27786e1[m HEAD@{151}: reset: moving to HEAD
+[33m27786e1[m HEAD@{152}: checkout: moving from dev to developer
+[33m27786e1[m HEAD@{153}: checkout: moving from developer to dev
+[33m27786e1[m HEAD@{154}: checkout: moving from main to developer
+[33m27786e1[m HEAD@{155}: clone: from https://github.com/mypymeapp/mypymeapp-back.git
