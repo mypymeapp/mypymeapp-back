@@ -55,7 +55,7 @@ export class JwtAuthGuard implements CanActivate {
             }
 
             // Agregar usuario al request para uso posterior
-            request.user = user;
+            request.user = { ...payload };
             
             return true;
         } catch {

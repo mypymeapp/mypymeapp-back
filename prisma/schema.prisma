@@ -19,11 +19,13 @@ model User {
   isActive          Boolean             @default(true)
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @default(now()) @updatedAt
+
   emailVerification EmailVerification[]
   oauth             OAuthAccount[]
   passwordReset     PasswordReset[]
   sessions          Session[]
   companies         UserCompany[]
+  transactions      Transaction[]
 }
 
 model Session {
@@ -81,13 +83,18 @@ model Company {
   razonSocial     String
   rubroPrincipal  String
   rut_Cuit        String            @unique
-  categories      Category[]
-  settings        CompanySettings?
-  CompanySupplier CompanySupplier[]
-  products        Product[]
-  StockMovements  StockMovements[]
-  members         UserCompany[]
-  customers       Customer[]
+
+  categories          Category[]
+  settings            CompanySettings?
+  CompanySupplier     CompanySupplier[]
+  products            Product[]
+  StockMovements      StockMovements[]
+  members             UserCompany[]
+  customers           Customer[]
+  transactions        Transaction[]
+  invoices            Invoice[]
+  subscriptionStatus  SubscriptionStatus @default(FREE)
+  subscriptionEndDate DateTime?
 }
 
 model CompanySettings {
@@ -103,6 +110,7 @@ model UserCompany {
   userId    String
   companyId String
   role      Role
+  
   company   Company @relation(fields: [companyId], references: [id])
   user      User    @relation(fields: [userId], references: [id])
 
@@ -137,6 +145,9 @@ model Product {
 
   company  Company   @relation(fields: [companyId], references: [id])
   category Category? @relation(fields: [categoryId], references: [id])
+
+  invoiceItems   InvoiceItem[]
+
 
   images         ProductImage[]   @relation("ProductToImages") // varias imágenes
   StockMovements StockMovements[]
@@ -212,9 +223,59 @@ model Customer {
   notes       String?
   companyId   String
   company     Company  @relation(fields: [companyId], references: [id])
-
-  
+  invoices    Invoice[]
 }
+
+/// ================================
+/// Pasarela de pagos
+/// ================================
+model Transaction {
+  id          String            @id @default(uuid())
+  userId      String            // referencia al usuario que paga
+  companyId   String?           // opcional: si la transacción está asociada a una empresa
+  type        TransactionType   // SUBSCRIPTION | ONE_TIME | REFUND
+  amount      Int               // en centavos
+  currency    Currency
+  status      TransactionStatus  // PENDING | SUCCESS | FAILED
+  provider    PaymentProvider   // STRIPE, MERCADOPAGO, etc.
+  providerRef String?           // ID devuelto por el proveedor (sessionId, paymentIntentId)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  // Se pueden registrar tanto pagos de usuarios individuales como de empresas
+  user    User?      @relation(fields: [userId], references: [id])
+  company Company?   @relation(fields: [companyId], references: [id])
+}
+
+model Invoice {
+  id                String       @id @default(uuid())
+  number            String
+  issuedAt          DateTime     @default(now())
+  dueAt             DateTime
+  status            InvoiceStatus @default(PENDING)
+  total             Float
+
+  companyId         String
+  customerId        String
+
+  company           Company      @relation(fields: [companyId], references: [id])
+  customer          Customer     @relation(fields: [customerId], references: [id])
+  items             InvoiceItem[]
+}
+
+model InvoiceItem {
+  id          String  @id @default(uuid())
+  invoiceId   String
+  productId   String
+  description String
+  qty         Int
+  price       Float
+
+  invoice     Invoice @relation(fields: [invoiceId], references: [id])
+  product     Product @relation(fields: [productId], references: [id])
+}
+
+
 
 /// ================================
 /// Roles and enums
@@ -223,6 +284,29 @@ enum Role {
   OWNER
   EMPLOYEE
   ADMIN
+}
+
+enum TransactionType {
+  SUBSCRIPTION
+  ONE_TIME
+  REFUND
+}
+
+enum TransactionStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  CANCELED
+}
+
+enum PaymentProvider {
+  STRIPE
+  MERCADOPAGO
+}
+
+enum SubscriptionStatus {
+  FREE
+  PREMIUM
 }
 
 enum Currency {
