@@ -14,21 +14,39 @@ export class AuthLib {
     private readonly jwtService: JwtService,
   ) {}
 
+  // en el auth.service.ts o auth.lib.ts
   async validateUser(data: SigninDto) {
     const user = await this.prisma.user.findUnique({
       where: { email: data.email },
+      // Usa 'include' para cargar la relación 'companies'
       include: {
-        companies: true,
+        companies: {
+          // En la relación 'companies' (que es la tabla UserCompany),
+          // incluye el objeto 'company' relacionado.
+          include: {
+            company: {
+              select: {
+                id: true,
+                name: true,
+                subscriptionStatus: true,
+              },
+            },
+          },
+        },
       },
     });
-    let company: Company | null = null;
-    if (user?.companies?.length && user.companies.length > 0) {
-      company = await this.prisma.company.findUnique({
-        where: { id: user.companies[0].companyId },
-      });
+
+    // Si el usuario existe, extrae la primera compañía y su rol.
+    if (user && user.companies.length > 0) {
+      const userCompany = user.companies[0];
+      const company = userCompany.company;
+      const role = userCompany.role;
+
+      return { user, role, company };
     }
 
-    return { user, company };
+    // Si no hay usuario o no tiene compañía, devuelve nulo para el usuario y compañía.
+    return { user: null, company: null, role: null };
   }
 
   async validateUserGoogle(data: CreateGoogleDto) {
