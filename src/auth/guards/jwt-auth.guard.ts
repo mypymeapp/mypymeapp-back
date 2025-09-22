@@ -25,11 +25,18 @@ export class JwtAuthGuard implements CanActivate {
 
         const request = context.switchToHttp().getRequest<Request>();
         
-        // Extraer token de la cookie
-        const token = request.cookies['auth-token'];
-        
+        // Extraer token de la cookie o header
+        let token = request.cookies['auth-token'];
+
         if (!token) {
-            throw new UnauthorizedException('Token de acceso requerido');
+            const authHeader = request.headers['authorization'];
+            if (authHeader && authHeader.startsWith('Bearer ')) {
+                token = authHeader.substring(7); // quitar "Bearer "
+            }
+        }
+
+        if (!token) {
+        throw new UnauthorizedException('Token de acceso requerido');
         }
 
         try {
@@ -55,7 +62,12 @@ export class JwtAuthGuard implements CanActivate {
             }
 
             // Agregar usuario al request para uso posterior
-            request.user = { ...payload };
+            request.user = {
+                ...payload,
+                name: user.name,
+                email: user.email,
+                companyId: payload.companyId, // si lo incluís en el token
+            };
             
             return true;
         } catch {
