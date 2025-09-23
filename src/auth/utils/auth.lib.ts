@@ -16,37 +16,33 @@ export class AuthLib {
 
   // en el auth.service.ts o auth.lib.ts
   async validateUser(data: SigninDto) {
+    // 1. Encuentra el usuario y sus compañías
     const user = await this.prisma.user.findUnique({
       where: { email: data.email },
-      // Usa 'include' para cargar la relación 'companies'
       include: {
         companies: {
-          // En la relación 'companies' (que es la tabla UserCompany),
-          // incluye el objeto 'company' relacionado.
           include: {
-            company: {
-              select: {
-                id: true,
-                name: true,
-                subscriptionStatus: true,
-              },
-            },
+            company: true, // Incluye la información de la compañía
           },
         },
       },
     });
 
-    // Si el usuario existe, extrae la primera compañía y su rol.
-    if (user && user.companies.length > 0) {
-      const userCompany = user.companies[0];
-      const company = userCompany.company;
-      const role = userCompany.role;
+    // 2. Si no se encuentra el usuario, devuelve null
+    if (!user) {
+      return { user: null, role: null, company: null };
+    }
 
+    // 3. Verifica si el usuario tiene una compañía asociada
+    if (user.companies.length > 0) {
+      const userCompany = user.companies[0];
+      const role = userCompany.role;
+      const company = userCompany.company;
       return { user, role, company };
     }
 
-    // Si no hay usuario o no tiene compañía, devuelve nulo para el usuario y compañía.
-    return { user: null, company: null, role: null };
+    // 4. Si el usuario existe pero no tiene compañías, devuelve solo el usuario
+    return { user, role: null, company: null };
   }
 
   async validateUserGoogle(data: CreateGoogleDto) {
