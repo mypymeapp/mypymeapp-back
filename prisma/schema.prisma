@@ -93,6 +93,7 @@ model Company {
   customers           Customer[]
   transactions        Transaction[]
   invoices            Invoice[]
+  orders              Order[]
   subscriptionStatus  SubscriptionStatus @default(FREE)
   subscriptionEndDate DateTime?
 }
@@ -147,7 +148,7 @@ model Product {
   category Category? @relation(fields: [categoryId], references: [id])
 
   invoiceItems   InvoiceItem[]
-
+  orderItems     OrderItem[]
 
   images         ProductImage[]   @relation("ProductToImages") // varias imágenes
   StockMovements StockMovements[]
@@ -212,6 +213,7 @@ model Supplier {
   categoryId      String
   category        Category          @relation(fields: [categoryId], references: [id])
   CompanySupplier CompanySupplier[]
+  orders          Order[]
 }
 
 model Customer {
@@ -275,6 +277,28 @@ model InvoiceItem {
   product     Product @relation(fields: [productId], references: [id])
 }
 
+model Order {
+  id         String      @id @default(uuid())
+  date       DateTime
+  companyId  String
+  supplierId String
+
+  company    Company     @relation(fields: [companyId], references: [id])
+  supplier   Supplier    @relation(fields: [supplierId], references: [id])
+  items      OrderItem[]
+
+  createdAt  DateTime    @default(now())
+}
+
+model OrderItem {
+  id        String   @id @default(uuid())
+  orderId   String
+  productId String
+  quantity  Int
+
+  order     Order    @relation(fields: [orderId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id])
+}
 
 
 /// ================================

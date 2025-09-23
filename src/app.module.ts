@@ -14,6 +14,7 @@ import { CustomerModule } from './customer/customer.module';
 // import { MercadoPagoModule } from './payments/mercadoPago/mercadopago.module';
 import { StripeModule } from './payments/stripe/stripe.module';
 import { InvoiceModule } from './invoice/invoice.module';
+import { OrdersModule } from './order/order.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { InvoiceModule } from './invoice/invoice.module';
     // MercadoPagoModule,
     StripeModule,
     InvoiceModule,
+    OrdersModule,
   ],
   controllers: [AppController],
   providers: [AppService, SeedService],
