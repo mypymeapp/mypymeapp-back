@@ -16,6 +16,7 @@ import { StripeModule } from './payments/stripe/stripe.module';
 import { InvoiceModule } from './invoice/invoice.module';
 import { OrdersModule } from './order/order.module';
 import { ReportsModule } from './reports/reports.module';
+import { AiModule } from './IA-Agent/ai.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { ReportsModule } from './reports/reports.module';
     InvoiceModule,
     OrdersModule,
     ReportsModule,
+    AiModule,
   ],
   controllers: [AppController],
   providers: [AppService, SeedService],
