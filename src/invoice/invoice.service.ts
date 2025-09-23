@@ -24,7 +24,8 @@ export class InvoiceService {
     });
     if (!customer) throw new NotFoundException('Customer not found');
 
-    // verificar stock antes de crear factura
+    // traer todos los productos involucrados
+    const productsMap = new Map<string, any>();
     for (const item of dto.items) {
       const product = await this.prisma.product.findUnique({
         where: { id: item.productId },
@@ -35,13 +36,19 @@ export class InvoiceService {
       if (product.qty < item.qty) {
         throw new BadRequestException(`Not enough stock for ${product.name}`);
       }
+      productsMap.set(item.productId, product);
     }
 
-    // crear factura y movimientos en una transacción
+    // calcular total usando price de cada producto
+    const total = dto.items.reduce((acc, item) => {
+      const product = productsMap.get(item.productId);
+      return acc + product.price * item.qty;
+    }, 0);
+
+    // crear factura y movimientos en transacción
     const invoice = await this.prisma.$transaction(async (tx) => {
-      // descontar stock y registrar movimiento
+      // descontar stock
       for (const item of dto.items) {
-        // crear movimiento de stock
         await tx.stockMovements.create({
           data: {
             companyId: dto.companyId,
@@ -54,54 +61,102 @@ export class InvoiceService {
           },
         });
 
-        // actualizar cantidad del producto
         await tx.product.update({
           where: { id: item.productId },
           data: { qty: { decrement: item.qty } },
         });
       }
 
-      // crear la factura con sus items
+      // crear la factura con items (rellenando description y price)
       const invoice = await tx.invoice.create({
         data: {
           number: dto.number,
-          dueAt: dto.dueAt,
-          total: dto.total,
+          dueAt: new Date(dto.dueAt),
+          total,
           companyId: dto.companyId,
           customerId: dto.customerId,
           items: {
-            create: dto.items.map((i) => ({
-              productId: i.productId,
-              description: i.description,
-              qty: i.qty,
-              price: i.price,
-            })),
+            create: dto.items.map((i) => {
+              const product = productsMap.get(i.productId);
+              return {
+                productId: i.productId,
+                description: product.description ?? product.name,
+                qty: i.qty,
+                price: product.price,
+              };
+            }),
           },
         },
-        include: { customer: true, items: true },
+        include: {
+          customer: true,
+          items: {
+            include: {
+              product: {
+                select: {
+                  cost: true,
+                },
+              },
+            },
+          },
+        },
       });
 
       return invoice;
     });
 
-    return invoice;
+    // añadir cost directamente a cada item en la respuesta
+    return {
+      ...invoice,
+      items: invoice.items.map((i) => ({
+        ...i,
+        cost: i.product.cost,
+      })),
+    };
   }
 
   async findAll(companyId: string) {
-    return this.prisma.invoice.findMany({
-      where: { companyId },
-      include: { customer: true, items: true },
-      orderBy: { issuedAt: 'desc' },
-    });
+    return this.prisma.invoice
+      .findMany({
+        where: { companyId },
+        include: {
+          customer: true,
+          items: {
+            include: {
+              product: { select: { cost: true } },
+            },
+          },
+        },
+        orderBy: { issuedAt: 'desc' },
+      })
+      .then((invoices) =>
+        invoices.map((inv) => ({
+          ...inv,
+          items: inv.items.map((i) => ({ ...i, cost: i.product.cost })),
+        })),
+      );
   }
 
   async findOne(id: string) {
     const invoice = await this.prisma.invoice.findUnique({
       where: { id },
-      include: { customer: true, items: true },
+      include: {
+        customer: true,
+        items: {
+          include: {
+            product: { select: { cost: true } },
+          },
+        },
+      },
     });
     if (!invoice) throw new NotFoundException('Invoice not found');
-    return invoice;
+
+    return {
+      ...invoice,
+      items: invoice.items.map((i) => ({
+        ...i,
+        cost: i.product.cost,
+      })),
+    };
   }
 }
 
