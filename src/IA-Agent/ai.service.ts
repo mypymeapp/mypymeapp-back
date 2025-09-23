@@ -9,7 +9,7 @@ export class AiService {
 
   // Regex que permite temas de negocio (ventas, compras, productos, stock, proyecciones, promociones…)
   private allowedRegex =
-    /(venta|ventas|compra|compras|producto|productos|stock|inventario|proyecci[oó]n(?:es)?|promoci[oó]n(?:es)?|ingreso(?:s)?|egreso(?:s)?)/i;
+    /(venta|ventas|compra|compras|proveedor(?:es)?|cliente(?:s)?|producto(?:s)?|art[ií]culo(?:s)?|servicio(?:s)?|categor[ií]a(?:s)?|stock|existencia(?:s)?|almac[eé]n|inventario(?:s)?|pedido(?:s)?|orden(?:es)?|devoluci[oó]n(?:es)?|proyecci[oó]n(?:es)?|promoci[oó]n(?:es)?|oferta(?:s)?|descuento(?:s)?|rebaja(?:s)?|campaña(?:s)?|facturaci[oó]n|ingreso(?:s)?|egreso(?:s)?|costo(?:s)?|gasto(?:s)?|ganancia(?:s)?|utilidad(?:es)?|margen(?:es)?|precio(?:s)?|pago(?:s)?|cobro(?:s)?|impuesto(?:s)?)/i;
 
   constructor(
     private prisma: PrismaService,
