@@ -36,6 +36,8 @@ export class AuthService {
   async signIn(dto: SigninDto, res: Response) {
     // Ahora result contendrá user, company y role
     const result = await this.authLib.validateUser(dto);
+
+    // Verifica si el usuario existe antes de intentar comparar la contraseña
     if (!result.user) throw new ForbiddenException('Invalid credentials');
 
     const compare = await this.authLib.comparePassword(
@@ -47,7 +49,6 @@ export class AuthService {
     try {
       const token = await this.authLib.generateToken(result.user);
       this.authLib.addCookie(res, token);
-
       return {
         token: token,
         user: {
@@ -55,6 +56,7 @@ export class AuthService {
           name: result.user.name,
           email: result.user.email,
           avatarUrl: result.user.avatarUrl,
+          // Usa el encadenamiento opcional (?) para evitar errores
           role: result.role,
           company: {
             id: result.company?.id,
@@ -64,7 +66,6 @@ export class AuthService {
         },
       };
     } catch (error) {
-      console.error(error);
       throw new InternalServerErrorException('Internal server error');
     }
   }
