@@ -15,6 +15,7 @@ import { CustomerModule } from './customer/customer.module';
 import { StripeModule } from './payments/stripe/stripe.module';
 import { InvoiceModule } from './invoice/invoice.module';
 import { OrdersModule } from './order/order.module';
+import { ReportsModule } from './reports/reports.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { OrdersModule } from './order/order.module';
     StripeModule,
     InvoiceModule,
     OrdersModule,
+    ReportsModule,
   ],
   controllers: [AppController],
   providers: [AppService, SeedService],
