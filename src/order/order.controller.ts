@@ -9,7 +9,7 @@ import {
 import { CreateOrderDto } from './dto/create-order.dto';
 import { OrdersService } from './order.service';
 
-@ApiTags('orders')
+@ApiTags('Orders')
 @Controller('orders')
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}

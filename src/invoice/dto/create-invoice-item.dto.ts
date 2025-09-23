@@ -1,17 +1,14 @@
-import { IsString, IsNumber, IsInt, Min } from 'class-validator';
+import { IsString, IsInt, Min } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateInvoiceItemDto {
+  @ApiProperty({ description: 'Product ID', example: 'uuid-product' })
   @IsString()
   productId: string;
 
-  @IsString()
-  description: string;
-
+  @ApiProperty({ description: 'Quantity of this product', example: 2 })
   @IsInt()
   @Min(1)
   qty: number;
-
-  @IsNumber()
-  price: number;
 }
 
