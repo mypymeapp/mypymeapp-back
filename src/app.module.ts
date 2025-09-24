@@ -17,6 +17,7 @@ import { InvoiceModule } from './invoice/invoice.module';
 import { OrdersModule } from './order/order.module';
 import { ReportsModule } from './reports/reports.module';
 import { AiModule } from './IA-Agent/ai.module';
+import { CompanyMembersModule } from './company-members/company-members.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { AiModule } from './IA-Agent/ai.module';
     OrdersModule,
     ReportsModule,
     AiModule,
+    CompanyMembersModule,
   ],
   controllers: [AppController],
   providers: [AppService, SeedService],
