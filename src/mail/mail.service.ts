@@ -38,7 +38,7 @@ export class EmailService {
     return this.sendEmail(
       email,
       '¡Bienvenido a MyPyme!',
-      welcomeTemplate(name),
+        welcomeTemplate(name),
     );
   }
 }

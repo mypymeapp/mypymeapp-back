@@ -7,13 +7,14 @@ import {
   ParseUUIDPipe,
   Post,
   Put,
+  Patch,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
 import { ProductsService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { ApiTags, ApiResponse, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiResponse, ApiOperation, ApiParam } from '@nestjs/swagger';
 import { StockService } from 'src/stock/stock.service';
 import { CreateStockDto } from 'src/stock/dto/create-stock.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -29,8 +30,8 @@ export class ProductsController {
   ) {}
 
   @ApiOperation({ summary: 'Create new product' })
-  @Post()
   @ApiResponse({ status: 201, description: 'Product created successfully' })
+  @Post()
   create(@Body() dto: CreateProductDto) {
     return this.productsService.create(dto);
   }
@@ -39,6 +40,12 @@ export class ProductsController {
   @Get()
   findAll() {
     return this.productsService.findAll();
+  }
+
+  @ApiOperation({ summary: 'Get all products + deletedAt — SUPERADMIN only' })
+  @Get('all')
+  findAllProducts() {
+    return this.productsService.findAllProducts();
   }
 
   @ApiOperation({ summary: 'Get products by id' })
@@ -56,14 +63,20 @@ export class ProductsController {
     return this.productsService.update(id, dto);
   }
 
-  @ApiOperation({ summary: 'Delete product by id' })
+  @ApiOperation({ summary: 'Soft delete product by id' })
   @Delete(':id')
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.productsService.remove(id);
   }
 
-  @Post(':id/stock')
+  @ApiOperation({ summary: 'Restore a deleted product' })
+  @Patch(':id/restore')
+  async restore(@Param('id') id: string) {
+    return this.productsService.restore(id);
+  }
+
   @ApiOperation({ summary: 'Register a stock movement for a product' })
+  @Post(':id/stock')
   async addStockMovement(
     @Param('id', ParseUUIDPipe) productId: string,
     @Body() dto: CreateStockDto,
@@ -74,14 +87,14 @@ export class ProductsController {
     });
   }
 
-  @Get(':id/stock')
   @ApiOperation({ summary: 'Listar movimientos de stock de un producto' })
+  @Get(':id/stock')
   async getStockMovements(@Param('id', ParseUUIDPipe) productId: string) {
     return this.stockService.findByProduct(productId);
   }
 
-  @Post(':id/image')
   @ApiOperation({ summary: 'Upload product image' })
+  @Post(':id/image')
   @UseInterceptors(FileInterceptor('file'))
   async uploadImage(
     @Param('id', ParseUUIDPipe) productId: string,

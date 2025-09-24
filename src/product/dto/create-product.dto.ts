@@ -7,26 +7,31 @@ import {
     IsNumber,
     Min,
     IsInt,
+    MaxLength,
 } from 'class-validator';
 
 export class CreateProductDto {
     @ApiProperty({ example: 'Notebook Lenovo' })
     @IsString()
+    @MaxLength(100)
     @IsNotEmpty()
     name: string;
 
     @ApiProperty({ example: 'SKU-12345' })
     @IsString()
+    @MaxLength(50)
     @IsNotEmpty()
     sku: string;
 
     @ApiProperty({ example: '9876543210', required: false })
     @IsOptional()
+    @MaxLength(20)
     @IsString()
     barcode?: string;
 
     @ApiProperty({ example: 'Laptop de 15 pulgadas', required: false })
     @IsOptional()
+    @MaxLength(250)
     @IsString()
     description?: string;
 

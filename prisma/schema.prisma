@@ -134,22 +134,21 @@ model Category {
 
 model Product {
   id          String  @id @default(uuid())
-  companyId   String
   name        String
   sku         String
   barcode     String?
   description String?
   price       Float
   cost        Float?
-  categoryId  String?
   qty         Int     @default(0) // stock actual, no negativo
+  categoryId  String?
+  companyId   String
+  deletedAt   DateTime? // Soft delete
 
-  company  Company   @relation(fields: [companyId], references: [id])
-  category Category? @relation(fields: [categoryId], references: [id])
-
+  company     Company   @relation(fields: [companyId], references: [id])
+  category    Category? @relation(fields: [categoryId], references: [id])
   invoiceItems   InvoiceItem[]
   orderItems     OrderItem[]
-
   images         ProductImage[]   @relation("ProductToImages") // varias imágenes
   StockMovements StockMovements[]
 

@@ -14,17 +14,15 @@ export class ProductsService {
     async create(data: CreateProductDto) {
         // 1. Validar que la empresa existe
         const company = await this.prisma.company.findUnique({
-        where: { id: data.companyId },
+            where: { id: data.companyId },
         });
         if (!company) {
-        throw new BadRequestException(
-            `Company with id ${data.companyId} does not exist`,
-        );
+            throw new BadRequestException(`Company with id ${data.companyId} does not exist`);
         }
 
         // 2. Validar unicidad de SKU dentro de la empresa
         const skuExists = await this.prisma.product.findFirst({
-        where: { companyId: data.companyId, sku: data.sku },
+            where: { companyId: data.companyId, sku: data.sku },
         });
         if (skuExists) {
         throw new BadRequestException(
@@ -64,6 +62,17 @@ export class ProductsService {
 
     findAll() {
         return this.prisma.product.findMany({
+            where: { deletedAt: null },
+            include: {
+                company: true,
+                category: true,
+                images: { include: { file: true } },
+            },
+        });
+    }
+
+    findAllProducts() {
+        return this.prisma.product.findMany({
             include: {
                 company: true,
                 category: true,
@@ -73,8 +82,8 @@ export class ProductsService {
     }
 
     async findOne(id: string) {
-        const product = await this.prisma.product.findUnique({
-            where: { id },
+        const product = await this.prisma.product.findFirst({
+            where: { id, deletedAt: null },
             include: {
                 company: true,
                 category: true,
@@ -82,7 +91,7 @@ export class ProductsService {
             },
         });
         if (!product) {
-        throw new NotFoundException(`Product with id ${id} not found`);
+            throw new NotFoundException(`Product with id ${id} not found`);
         }
         return product;
     }
@@ -92,51 +101,64 @@ export class ProductsService {
 
         // Validar SKU único si se actualiza
         if (data.sku && data.sku !== product.sku) {
-        const duplicate = await this.prisma.product.findFirst({
-            where: { companyId: product.companyId, sku: data.sku },
-        });
-        if (duplicate) {
-            throw new BadRequestException(
-            `SKU '${data.sku}' already exists in this company`,
-            );
-        }
+            const duplicate = await this.prisma.product.findFirst({
+                where: { companyId: product.companyId, sku: data.sku },
+            });
+            if (duplicate) {
+                throw new BadRequestException(
+                `SKU '${data.sku}' already exists in this company`,
+                );
+            }
         }
 
         // Validar categoría si se actualiza
         if (data.categoryId && data.categoryId !== product.categoryId) {
-        const category = await this.prisma.category.findUnique({
-            where: { id: data.categoryId },
-        });
-        if (!category) {
-            throw new BadRequestException(
-            `Category with id ${data.categoryId} does not exist`,
-            );
-        }
+            const category = await this.prisma.category.findUnique({
+                where: { id: data.categoryId },
+            });
+            if (!category) {
+                throw new BadRequestException(
+                    `Category with id ${data.categoryId} does not exist`,
+                );
+            }
         }
 
         // Actualizar datos básicos
         const { imageFileIds, ...updateData } = data;
         await this.prisma.product.update({
-        where: { id },
-        data: updateData,
+            where: { id },
+            data: updateData,
         });
 
         // Si vienen nuevas imágenes → reemplazar
         if (imageFileIds) {
         await this.prisma.productImage.deleteMany({ where: { productId: id } });
-        for (const fileId of imageFileIds) {
-            await this.prisma.productImage.create({
-            data: { productId: id, fileId },
-            });
+            for (const fileId of imageFileIds) {
+                await this.prisma.productImage.create({
+                    data: { productId: id, fileId },
+                });
+            }
         }
-        }
-
         return this.findOne(id);
     }
 
     async remove(id: string) {
-        await this.findOne(id); // valida existencia
-        await this.prisma.productImage.deleteMany({ where: { productId: id } });
-        return this.prisma.product.delete({ where: { id } });
+        await this.findOne(id); 
+        return this.prisma.product.update({
+            where: { id },
+            data: { deletedAt: new Date() },// 🔑 soft delete 
+        });
+    }
+
+    async restore(id: string) {
+        const product = await this.prisma.product.findFirst({
+            where: { id, deletedAt: { not: null } },
+        });
+        if (!product) throw new NotFoundException(`Product with id ${id} not found or not deleted`);
+
+        return this.prisma.product.update({
+            where: { id },
+            data: { deletedAt: null },
+        });
     }
 }

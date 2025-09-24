@@ -1,5 +1,6 @@
 import {
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -196,6 +197,13 @@ export class CompanyService {
         where: { id: companyId },
       });
       if (!company) throw new NotFoundException('Empresa no encontrada');
+
+      // Validación de suscripción PREMIUM
+      if (company.subscriptionStatus !== 'PREMIUM') {
+        throw new ForbiddenException(
+          'Solo las empresas con plan PREMIUM pueden agregar miembros',
+        );
+      }
 
       const user = await this.prisma.user.findUnique({ where: { id: userId } });
       if (!user) throw new NotFoundException('Usuario no encontrado');
