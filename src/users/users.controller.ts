@@ -15,6 +15,7 @@ import {
   UseInterceptors,
   UploadedFile,
   UseGuards,
+  BadRequestException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { Role } from '@prisma/client';
@@ -41,11 +42,18 @@ export class UsersController {
     private readonly filesService: FilesService,
   ) {}
 
-  @ApiOperation({ summary: 'Get all users' })
+  @ApiOperation({ summary: 'Get all active users' })
   @Get()
   // @Roles(Role.ADMIN, Role.OWNER)
   getUsers(@Query('companyId') companyId?: string) {
-    return this.usersService.getUsers(companyId);
+    return this.usersService.getActiveUsers(companyId);
+  }
+
+  @ApiOperation({ summary: 'Get all users (active and inactive) — SUPERADMIN only' })
+  @Get('all')
+  // @Roles(Role.SUPERADMIN)
+  getAllUsers(@Query('companyId') companyId?: string) {
+    return this.usersService.getAllUsers(companyId);
   }
 
   @ApiOperation({ summary: 'Get user info passing user id as a parameter' })

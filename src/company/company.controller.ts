@@ -28,9 +28,11 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @ApiTags('Companies')
 @Controller('companies')
+// @UseGuards(JwtAuthGuard, RolesGuard)
 export class CompanyController {
   constructor(
     private readonly companyService: CompanyService,
@@ -47,6 +49,7 @@ export class CompanyController {
   @ApiOperation({ summary: 'Get all companies' })
   @ApiResponse({ status: 200, description: 'Company list' })
   @Get()
+  // @Roles(Role.SUPERADMIN)
   findAll() {
     return this.companyService.getCompanies();
   }
@@ -54,6 +57,7 @@ export class CompanyController {
   @ApiOperation({ summary: 'Get a company passing id as a parameter' })
   @ApiResponse({ status: 200, description: 'Specific company data' })
   @Get(':id')
+  // @Roles(Role.SUPERADMIN)
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.companyService.getCompanyById(id);
   }
@@ -68,6 +72,7 @@ export class CompanyController {
   @ApiOperation({ summary: 'Update company data' })
   @ApiResponse({ status: 200, description: 'Edited company data' })
   @Put(':id')
+  // @Roles(Role.ADMIN, Role.OWNER)
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() body: UpdateCompanyDto,
@@ -78,12 +83,14 @@ export class CompanyController {
   @ApiOperation({ summary: 'Delete a company' })
   @ApiResponse({ status: 200, description: 'Deleted company data' })
   @Delete(':id')
+  // @Roles(Role.SUPERADMIN)
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.companyService.deleteCompany(id);
   }
 
   @ApiOperation({ summary: 'Get company settings' })
   @Get(':id/settings')
+  // @Roles(Role.ADMIN, Role.OWNER)
   getSettings(@Param('id', ParseUUIDPipe) id: string) {
     return this.companyService.getSettings(id);
   }
@@ -91,6 +98,7 @@ export class CompanyController {
   @ApiOperation({ summary: 'Update company settings' })
   @ApiResponse({ status: 200, description: 'Edited company data' })
   @Patch(':id/settings')
+  // @Roles(Role.ADMIN, Role.OWNER)
   updateSettings(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() body: UpdateSettingsDto,
@@ -100,6 +108,7 @@ export class CompanyController {
 
   @ApiOperation({ summary: 'Add member to a company' })
   @Post(':id/members')
+  // @Roles(Role.ADMIN, Role.OWNER)
   addMember(
     @Param('id', ParseUUIDPipe) companyId: string,
     @Body() body: { userId: string; role: Role },
@@ -110,6 +119,7 @@ export class CompanyController {
   @ApiOperation({ summary: 'Actualizar el rol de un miembro' })
   @ApiResponse({ status: 200, description: 'Edited company data' })
   @Patch(':id/members/:userId')
+  // @Roles(Role.ADMIN, Role.OWNER)
   updateMemberRole(
     @Param('id', ParseUUIDPipe) companyId: string,
     @Param('userId', ParseUUIDPipe) userId: string,
@@ -120,6 +130,7 @@ export class CompanyController {
 
   @ApiOperation({ summary: 'Delete member of a company' })
   @Delete(':id/members/:userId')
+  // @Roles(Role.ADMIN, Role.OWNER)
   removeMember(
     @Param('id', ParseUUIDPipe) companyId: string,
     @Param('userId', ParseUUIDPipe) userId: string,
@@ -137,6 +148,7 @@ export class CompanyController {
   @ApiOperation({ summary: 'Update company logo' })
   @ApiResponse({ status: 201, description: 'Logo successfully uploaded' })
   @Post(':companyId/logo')
+  // @Roles(Role.ADMIN, Role.OWNER)
   @UseInterceptors(FileInterceptor('logo'))
   async uploadLogo(
     @Param('companyId', ParseUUIDPipe) companyId: string,

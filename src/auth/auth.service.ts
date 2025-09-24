@@ -21,7 +21,7 @@ export class AuthService {
 
   async validateUser(email: string, password: string) {
     const result = await this.authLib.validateUser({ email, password });
-    if (!result || !result.user) return null;
+    if (!result.user || !result.user.isActive) return null;
 
     const compare = await this.authLib.comparePassword(
       password,
