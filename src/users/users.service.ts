@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { Role } from '@prisma/client';
@@ -13,8 +14,11 @@ export class UsersService {
   constructor(private prisma: PrismaService) {}
 
   /** Lista usuarios, opcionalmente filtrando por compañía */
-  async getUsers(companyId?: string) {
-    const where = companyId ? { companies: { some: { companyId } } } : {};
+  async getActiveUsers(companyId?: string) {
+    const where = {
+      isActive: true,
+      ...(companyId ? { companies: { some: { companyId } } } : {}),
+    };
 
     return this.prisma.user.findMany({
       where,
@@ -22,21 +26,24 @@ export class UsersService {
     });
   }
 
-  /** Obtiene detalle de un usuario por id */
+  /** Obtiene detalle de un usuario activo por id */
   async getUserById(id: string) {
     const user = await this.prisma.user.findUnique({
       where: { id },
       include: { companies: { include: { company: true } } },
     });
 
-    if (!user) throw new NotFoundException('Usuario no encontrado');
+    if (!user || !user.isActive)
+      throw new NotFoundException('Usuario no encontrado o inactivo');
 
     return user;
   }
 
-  /** Actualizar usuario */
+   /** Actualizar usuario (solo si está activo) */
   async updateUser(id: string, dto: UpdateUserDto) {
-    await this.getUserById(id); // validar existencia
+    const user = await this.getUserById(id);
+    if (!user.isActive)
+      throw new ForbiddenException('No se puede actualizar un usuario inactivo');
 
     return this.prisma.user.update({
       where: { id },
@@ -46,7 +53,9 @@ export class UsersService {
 
   /** Soft delete / desactivar usuario */
   async deleteUser(id: string) {
-    await this.getUserById(id);
+    const user = await this.getUserById(id);
+    if (!user.isActive)
+      throw new BadRequestException('El usuario ya está desactivado');
 
     return this.prisma.user.update({
       where: { id },
@@ -54,12 +63,12 @@ export class UsersService {
     });
   }
 
-  /** Listar compañías donde participa un usuario */
+  /** Listar compañías donde participa un usuario activo */
   async getUserCompanies(userId: string) {
-    await this.getUserById(userId);
+    const user = await this.getUserById(userId);
 
     return this.prisma.userCompany.findMany({
-      where: { userId },
+      where: { userId: user.id },
       include: { company: true },
     });
   }
@@ -82,9 +91,25 @@ export class UsersService {
     if (!userCompany)
       throw new NotFoundException('Usuario no pertenece a esta compañía');
 
+    // Validar que el usuario asociado a la relación esté activo
+    const user = await this.getUserById(userId);
+    if (!user.isActive)
+      throw new ForbiddenException('No se puede cambiar rol a un usuario inactivo');
+
+
     return this.prisma.userCompany.update({
       where: { id: userCompany.id },
       data: { role: dto.role },
+    });
+  }
+
+  /** Lista todos los usuarios (activos e inactivos) — SOLO SUPERADMIN */
+  async getAllUsers(companyId?: string) {
+    const where = companyId ? { companies: { some: { companyId } } } : {};
+
+    return this.prisma.user.findMany({
+      where,
+      include: { companies: { include: { company: true } } },
     });
   }
 }
