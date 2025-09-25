@@ -34,7 +34,9 @@ export class InvoiceService {
         throw new NotFoundException(`Product ${item.productId} not found`);
       }
       if (product.qty < item.qty) {
-        throw new BadRequestException(`Not enough stock for ${product.name}`);
+        throw new BadRequestException(
+          `No hay stock suficiente para facturar ${product.name}`,
+        );
       }
       productsMap.set(item.productId, product);
     }
