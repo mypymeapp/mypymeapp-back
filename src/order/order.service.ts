@@ -7,6 +7,7 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { StockService } from '../stock/stock.service';
 import { StockMovementType } from '@prisma/client';
 import { PrismaService } from 'prisma/prisma.service';
+import { UpdateOrderDto } from './dto/update-order.dto';
 
 @Injectable()
 export class OrdersService {
@@ -46,6 +47,7 @@ export class OrdersService {
       const createdOrder = await tx.order.create({
         data: {
           date: new Date(dto.date),
+          invoiceNumber: dto.invoiceNumber,
           companyId: dto.companyId,
           supplierId: dto.supplierId,
         },
@@ -99,6 +101,55 @@ export class OrdersService {
       },
       orderBy: { date: 'desc' },
     });
+  }
+
+  async delete(id: string) {
+    // Validar que existe
+    const order = await this.prisma.order.findUnique({ where: { id } });
+    if (!order) throw new NotFoundException('Orden no encontrada');
+
+    // Borrar primero los items para no romper la FK
+    await this.prisma.orderItem.deleteMany({ where: { orderId: id } });
+
+    // Borrar la orden
+    await this.prisma.order.delete({ where: { id } });
+
+    return { message: 'Orden eliminada correctamente' };
+  }
+
+  async update(id: string, dto: UpdateOrderDto) {
+    const order = await this.prisma.order.findUnique({
+      where: { id },
+      include: { items: true },
+    });
+    if (!order) throw new NotFoundException('Orden no encontrada');
+
+    // Si hay productos nuevos, borramos los items y los recreamos
+    if (dto.products && dto.products.length > 0) {
+      await this.prisma.orderItem.deleteMany({ where: { orderId: id } });
+
+      for (const p of dto.products) {
+        await this.prisma.orderItem.create({
+          data: {
+            orderId: id,
+            productId: p.productId,
+            quantity: p.quantity,
+          },
+        });
+      }
+    }
+
+    // Actualizar la orden
+    const updatedOrder = await this.prisma.order.update({
+      where: { id },
+      data: {
+        date: dto.date ? new Date(dto.date) : order.date,
+        supplierId: dto.supplierId ?? order.supplierId,
+        invoiceNumber: dto.invoiceNumber ?? order.invoiceNumber,
+      },
+    });
+
+    return this.findById(updatedOrder.id);
   }
 }
 

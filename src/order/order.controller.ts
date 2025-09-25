@@ -1,4 +1,12 @@
-import { Controller, Post, Body, Get, Param } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Param,
+  Patch,
+  Delete,
+} from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -8,6 +16,7 @@ import {
 } from '@nestjs/swagger';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { OrdersService } from './order.service';
+import { UpdateOrderDto } from './dto/update-order.dto';
 
 @ApiTags('Orders')
 @Controller('orders')
@@ -46,6 +55,22 @@ export class OrdersController {
   })
   findByCompany(@Param('companyId') companyId: string) {
     return this.ordersService.findByCompany(companyId);
+  }
+  @Delete(':id')
+  @ApiOperation({ summary: 'Delete order by ID' })
+  @ApiParam({ name: 'id', type: String, description: 'Order ID' })
+  @ApiResponse({ status: 200, description: 'Order deleted.' })
+  delete(@Param('id') id: string) {
+    return this.ordersService.delete(id);
+  }
+
+  @Patch(':id')
+  @ApiOperation({ summary: 'Update order by ID' })
+  @ApiParam({ name: 'id', type: String, description: 'Order ID' })
+  @ApiBody({ type: UpdateOrderDto })
+  @ApiResponse({ status: 200, description: 'Order updated.' })
+  update(@Param('id') id: string, @Body() dto: UpdateOrderDto) {
+    return this.ordersService.update(id, dto);
   }
 }
 
