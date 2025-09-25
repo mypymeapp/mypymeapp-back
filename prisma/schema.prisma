@@ -279,6 +279,7 @@ model InvoiceItem {
 model Order {
   id         String      @id @default(uuid())
   date       DateTime
+  invoiceNumber String  @default("SIN_FACTURA")
   companyId  String
   supplierId String
 

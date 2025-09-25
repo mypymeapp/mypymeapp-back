@@ -5,6 +5,7 @@ import {
   Min,
   ArrayMinSize,
   ValidateNested,
+  IsString,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
@@ -33,6 +34,13 @@ export class CreateOrderDto {
   })
   @IsDateString()
   date: string;
+
+  @ApiProperty({
+    description: 'Invoice number of the order',
+    example: 'FAC-2025-0001',
+  })
+  @IsString()
+  invoiceNumber: string;
 
   @ApiProperty({
     description: 'Unique identifier of the company placing the order',
