@@ -51,5 +51,13 @@ export class CategoriesController {
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.categoriesService.remove(id);
   }
+
+  @ApiOperation({ summary: 'Get categories by company ID' })
+  @Get('/company/:companyId')
+  @ApiResponse({ status: 200, description: 'Categories found.' })
+  @ApiResponse({ status: 404, description: 'Company not found.' })
+  findByCompany(@Param('companyId', ParseUUIDPipe) companyId: string) {
+    return this.categoriesService.findByCompany(companyId);
+  }
 }
 
