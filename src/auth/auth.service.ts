@@ -226,11 +226,9 @@ export class AuthService {
       },
     });
 
-    // Mandar mail con link
-    const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
-    await this.emailService.sendPasswordResetEmail(user.email, resetLink);
+    await this.emailService.sendPasswordResetEmail(user.email, token);
 
-    return { message: 'If that email exists, we sent instructions' };
+    return { message: 'We sent instructions to your email account' };
   }
 
   async resetPassword(dto: ResetPasswordDto) {
