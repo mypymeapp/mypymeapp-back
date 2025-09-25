@@ -23,6 +23,7 @@ import {
 } from './decorators/current-user.decorator';
 import { ApiTags } from '@nestjs/swagger';
 import { CreateGoogleDto, ResponseGoogleDto } from './dto/google.dto';
+import { ForgotPasswordDto, ResetPasswordDto } from './dto/forgot-password.dto';
 
 @Controller('auth')
 @ApiTags('Authentications')
@@ -74,6 +75,18 @@ export class AuthController {
       message: 'Perfil obtenido exitosamente',
       user,
     };
+  }
+
+  @ApiOperation({ summary: 'Forgot password - request reset link' })
+  @Post('forgot-password')
+  async forgotPassword(@Body() dto: ForgotPasswordDto) {
+    return this.authService.forgotPassword(dto);
+  }
+
+  @ApiOperation({ summary: 'Reset password with token' })
+  @Post('reset-password')
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    return this.authService.resetPassword(dto);
   }
 }
 
