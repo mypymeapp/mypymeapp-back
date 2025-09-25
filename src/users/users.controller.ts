@@ -64,7 +64,7 @@ export class UsersController {
   }
 
   @ApiOperation({
-    summary:
+    summary: 
       'Update user name, email or avatar info passing user id as a parameter',
   })
   @Patch(':id')
