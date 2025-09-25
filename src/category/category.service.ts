@@ -88,5 +88,20 @@ export class CategoriesService {
 
     return this.prisma.category.delete({ where: { id } });
   }
+
+  async findByCompany(companyId: string) {
+    // valida que exista la company
+    const company = await this.prisma.company.findUnique({
+      where: { id: companyId },
+    });
+    if (!company) {
+      throw new NotFoundException(`Company with id ${companyId} not found`);
+    }
+
+    return this.prisma.category.findMany({
+      where: { companyId },
+      include: { products: true, company: false },
+    });
+  }
 }
 
