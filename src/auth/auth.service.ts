@@ -77,16 +77,25 @@ export class AuthService {
     const result = await this.authLib.validateUserGoogle(dto);
     // Caso: usuario ya existe
     if (result.user) {
+    // Actualizar avatar si no existe
+      if (!result.user.avatarUrl && dto.avatarUrl) {
+      await this.prisma.user.update({
+          where: { id: result.user.id },
+          data: { avatarUrl: dto.avatarUrl },
+        });
+        result.user.avatarUrl = dto.avatarUrl; // actualizar localmente para la respuesta
+      }
+
       const token = await this.authLib.generateToken(result.user);
       this.authLib.addCookie(res, token);
-      
+
       return {
         token: token,
         user: {
           id: result.user.id,
           name: result.user.name,
           email: result.user.email,
-          avatarUrl: result.user.avatarUrl, 
+          avatarUrl: result.user.avatarUrl,
           company: {
             id: result.company?.id,
             name: result.company?.name,
@@ -94,6 +103,7 @@ export class AuthService {
         },
       };
     }
+
 
     // Caso: usuario NO existe 
     try {
