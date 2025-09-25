@@ -75,15 +75,18 @@ export class AuthService {
 
   async signInWithGoogle(dto: CreateGoogleDto, res: Response) {
     const result = await this.authLib.validateUserGoogle(dto);
+    // Caso: usuario ya existe
     if (result.user) {
       const token = await this.authLib.generateToken(result.user);
       this.authLib.addCookie(res, token);
+      
       return {
         token: token,
         user: {
           id: result.user.id,
           name: result.user.name,
           email: result.user.email,
+          avatarUrl: result.user.avatarUrl, 
           company: {
             id: result.company?.id,
             name: result.company?.name,
@@ -91,6 +94,8 @@ export class AuthService {
         },
       };
     }
+
+    // Caso: usuario NO existe 
     try {
       const user = await this.prisma.user.create({
         data: {
@@ -116,6 +121,7 @@ export class AuthService {
           id: user.id,
           name: user.name,
           email: user.email,
+          avatarUrl: user.avatarUrl,
           company: {},
         },
       };
