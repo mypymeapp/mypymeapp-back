@@ -2,6 +2,7 @@ import * as nodemailer from 'nodemailer';
 import { ConfigService } from '@nestjs/config';
 import { Injectable } from '@nestjs/common';
 import { welcomeTemplate } from 'src/templates/welcome.template';
+import { passwordResetTemplate } from 'src/templates/password-reset.template';
 
 @Injectable()
 export class EmailService {
@@ -41,5 +42,18 @@ export class EmailService {
         welcomeTemplate(name),
     );
   }
+  
+  async sendPasswordResetEmail(email: string, token: string) {
+    const resetUrl = `${this.configService.get<string>(
+      'FRONTEND_URL',
+    )}/reset-password?token=${token}`;
+
+    return this.sendEmail(
+      email,
+      'Restablecer contraseña - MyPymeApp',
+      passwordResetTemplate(resetUrl),
+    );
+  }
+
 }
 

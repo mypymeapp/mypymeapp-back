@@ -8,15 +8,17 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { Role } from '@prisma/client';
 import { FilesService } from '../files/files.service';
 import * as bcrypt from 'bcrypt';
+import { EmailService } from 'src/mail/mail.service';
 
 @Injectable()
 export class CompanyService {
     constructor(
       private readonly prisma: PrismaService,
       private readonly filesService: FilesService,
+      private emailService: EmailService,
     ) {}
 
-    async createCompany(data: {
+  async createCompany(data: {
       name: string;
       mail: string;
       password: string;
@@ -24,18 +26,16 @@ export class CompanyService {
       razonSocial: string;
       rut_Cuit: string;
       rubroPrincipal: string;
-      userId: string; // 👈 nuevo campo para vincular al usuario
+      userId: string;
     }) {
-      // verificar que no exista una empresa con mismo mail o RUT/CUIT
+      // verificar duplicados
       const existing = await this.prisma.company.findFirst({
         where: {
           OR: [{ mail: data.mail }, { rut_Cuit: data.rut_Cuit }],
         },
       });
       if (existing) {
-        throw new ConflictException(
-          'Ya existe una empresa con ese mail o RUT/CUIT',
-        );
+        throw new ConflictException('Ya existe una empresa con ese mail o RUT/CUIT');
       }
 
       // verificar que el usuario exista
@@ -46,12 +46,9 @@ export class CompanyService {
         throw new NotFoundException('Usuario no encontrado');
       }
 
-      // hash de la contraseña antes de guardar
       const hashedPassword = await bcrypt.hash(data.password, 10);
 
-      // usar una transacción para garantizar consistencia
       const result = await this.prisma.$transaction(async (tx) => {
-        // 1. crear empresa
         const company = await tx.company.create({
           data: {
             name: data.name,
@@ -77,20 +74,29 @@ export class CompanyService {
           },
         });
 
-        // 2. registrar relación en UserCompany
         await tx.userCompany.create({
           data: {
             userId: data.userId,
             companyId: company.id,
-            role: 'OWNER', // 👈 el usuario que crea pasa a ser OWNER
+            role: 'OWNER',
           },
         });
 
         return company;
       });
 
-    return result;
-  }
+      try {
+        const recipientEmail = result.mail || user.email; // si no hay mail de empresa, usa el del usuario
+        const recipientName = result.mail ? result.name : user.name;
+
+        await this.emailService.sendWelcomeEmail(recipientName, recipientEmail);
+      } catch (error) {
+        console.error('Error enviando mail de bienvenida:', error.message);
+        // no lanzamos excepción para no romper el flujo de creación
+      }
+      return result;
+    }
+
 
     async getCompanies() {
       return this.prisma.company.findMany({

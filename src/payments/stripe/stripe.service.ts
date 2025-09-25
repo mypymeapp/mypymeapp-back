@@ -4,6 +4,8 @@ import Stripe from 'stripe';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { Currency, SubscriptionStatus } from '@prisma/client';
 import { EmailService } from '../../mail/mail.service';
+import { subscriptionInvoiceTemplate } from 'src/templates/subscriptionInvoiceTemplate';
+import { subscriptionActivatedTemplate } from 'src/templates/subscriptionActivatedTemplate';
 
 // 1. Extiende Stripe.Invoice
 interface InvoiceWithSubscription extends Stripe.Invoice {
@@ -121,9 +123,7 @@ export class StripeService {
                 await this.emailService.sendEmail(
                 user.email,
                 '¡Gracias por tu suscripción!',
-                `<p>Hola ${user.name},</p>
-                <p>Tu suscripción PREMIUM fue activada con éxito para la compañía ${updatedCompany.name}.</p>
-                <p>Válida hasta: ${validUntil.toLocaleDateString()}.</p>`
+                subscriptionActivatedTemplate(user.name, updatedCompany.name, validUntil.toLocaleDateString()),
                 );
             }
             break;
@@ -186,19 +186,16 @@ export class StripeService {
                 const user = await this.prisma.user.findUnique({ where: { id: userId } });
 
                 if (user) {
-                const validUntil =
-                    subscriptionEndDate?.toLocaleDateString() ??
-                    updatedCompany.subscriptionEndDate?.toLocaleDateString() ??
-                    'N/A';
+                    const validUntil =
+                        subscriptionEndDate?.toLocaleDateString() ??
+                        updatedCompany.subscriptionEndDate?.toLocaleDateString() ??
+                        'N/A';
 
-                await this.emailService.sendEmail(
+                    await this.emailService.sendEmail(
                     user.email,
                     'Factura de suscripción pagada',
-                    `<p>Hola ${user.name ?? ''},</p>
-                    <p>Tu pago de suscripción PREMIUM se registró correctamente.</p>
-                    <p>Monto: ${(invoice.amount_paid / 100).toFixed(2)} ${invoice.currency.toUpperCase()}.</p>
-                    <p>Válida hasta: ${validUntil}.</p>`
-                );
+                    subscriptionInvoiceTemplate(user.name ?? '', invoice.amount_paid / 100, invoice.currency, validUntil),
+                    );
                 }
             }
             break;
