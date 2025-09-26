@@ -26,6 +26,8 @@ model User {
   sessions          Session[]
   companies         UserCompany[]
   transactions      Transaction[]
+  tickets           Ticket[]
+  ticketMessages    TicketMessage[]
 }
 
 model Session {
@@ -308,6 +310,7 @@ enum Role {
   OWNER
   EMPLOYEE
   ADMIN
+  SUPERADMIN
 }
 
 enum TransactionType {
@@ -361,4 +364,99 @@ enum StockMovementType {
   IN
   OUT
   ADJUSTMENT
+}
+
+
+// =================================
+// Soporte y Mensajeria de usuarios
+// =================================
+model Ticket {
+  id                String              @id @default(uuid())
+  title             String
+  description       String
+  priority          Priority            @default(MEDIA)
+  status            Status              @default(ABIERTO)
+  department        Department          @default(TECNICO)
+  
+  // Relaciones
+  userId            String
+  user              User                @relation(fields: [userId], references: [id])
+  assignedAdminId   String?
+  assignedAdmin     Admin?              @relation(fields: [assignedAdminId], references: [id])
+  messages          TicketMessage[]
+  
+  // Timestamps
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  closedAt          DateTime?
+  
+  @@map("tickets")
+}
+
+model TicketMessage {
+  id                String              @id @default(uuid())
+  ticketId          String
+  ticket            Ticket              @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  
+  // Contenido
+  message           String
+  isFromUser        Boolean             // true = usuario, false = admin
+  
+  // Autor (puede ser user o admin)
+  userId            String?
+  user              User?               @relation(fields: [userId], references: [id])
+  adminId           String?
+  admin             Admin?              @relation(fields: [adminId], references: [id])
+  
+  // Timestamps
+  createdAt         DateTime            @default(now())
+  readAt            DateTime?
+  
+  @@map("ticket_messages")
+}
+
+model Admin {
+  id                String              @id @default(uuid())
+  email             String              @unique
+  name              String
+  role              AdminRole           @default(SUPPORT)
+  department        Department          @default(TECNICO)
+  
+  // Relaciones
+  assignedTickets   Ticket[]
+  messages          TicketMessage[]
+  
+  // Timestamps
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  
+  @@map("admins")
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  SUPPORT
+  MANAGER
+}
+
+enum Priority {
+  BAJA
+  MEDIA
+  ALTA
+  CRITICA
+}
+
+enum Status {
+  ABIERTO
+  EN_PROCESO
+  ESPERANDO_USUARIO
+  RESUELTO
+  CERRADO
+}
+
+enum Department {
+  TECNICO
+  FINANCIERO
+  ADMINISTRATIVO
+  VENTAS
 }
