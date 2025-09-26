@@ -19,6 +19,7 @@ import { ReportsModule } from './reports/reports.module';
 import { AiModule } from './IA-Agent/ai.module';
 import { CompanyMembersModule } from './company-members/company-members.module';
 import { SupportModule } from './support/support.module';
+import { CronReportsModule } from './cronReports/cronReports.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { SupportModule } from './support/support.module';
     AiModule,
     CompanyMembersModule,
     SupportModule,
+    CronReportsModule
   ],
   controllers: [AppController],
   providers: [AppService, SeedService],
