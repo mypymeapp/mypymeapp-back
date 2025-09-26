@@ -11,8 +11,8 @@ export class EmailService {
   constructor(private configService: ConfigService) {
     this.transporter = nodemailer.createTransport({
       host: 'smtp.gmail.com',
-      port: 465,
-      secure: true, // Usar SSL para el puerto 465
+      port: 587,
+      secure: false,
       auth: {
         user: this.configService.get<string>('GMAIL_USER'),
         pass: this.configService.get<string>('GMAIL_APP_PASSWORD'),
@@ -39,10 +39,10 @@ export class EmailService {
     return this.sendEmail(
       email,
       '¡Bienvenido a MyPyme!',
-        welcomeTemplate(name),
+      welcomeTemplate(name),
     );
   }
-  
+
   async sendPasswordResetEmail(email: string, token: string) {
     const resetUrl = `${this.configService.get<string>(
       'FRONTEND_URL',
@@ -54,6 +54,5 @@ export class EmailService {
       passwordResetTemplate(resetUrl),
     );
   }
-
 }
 
