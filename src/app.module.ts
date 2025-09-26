@@ -18,6 +18,7 @@ import { OrdersModule } from './order/order.module';
 import { ReportsModule } from './reports/reports.module';
 import { AiModule } from './IA-Agent/ai.module';
 import { CompanyMembersModule } from './company-members/company-members.module';
+import { SupportModule } from './support/support.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { CompanyMembersModule } from './company-members/company-members.module';
     ReportsModule,
     AiModule,
     CompanyMembersModule,
+    SupportModule,
   ],
   controllers: [AppController],
   providers: [AppService, SeedService],
