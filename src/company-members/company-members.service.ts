@@ -31,11 +31,11 @@ export class CompanyMembersService {
       },
     });
 
-    try {
-      await this.emailService.sendWelcomeEmail(user.name, user.email);
-    } catch (err) {
-      console.error('Error enviando correo bienvenida:', err);
-    }
+    // try {
+    //   await this.emailService.sendWelcomeEmail(user.name, user.email);
+    // } catch (err) {
+    //   console.error('Error enviando correo bienvenida:', err);
+    // }
 
     const member = await this.prisma.userCompany.create({
       data: {
