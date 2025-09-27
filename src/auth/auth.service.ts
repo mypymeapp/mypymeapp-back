@@ -77,9 +77,9 @@ export class AuthService {
     const result = await this.authLib.validateUserGoogle(dto);
     // Caso: usuario ya existe
     if (result.user) {
-    // Actualizar avatar si no existe
+      // Actualizar avatar si no existe
       if (!result.user.avatarUrl && dto.avatarUrl) {
-      await this.prisma.user.update({
+        await this.prisma.user.update({
           where: { id: result.user.id },
           data: { avatarUrl: dto.avatarUrl },
         });
@@ -104,8 +104,7 @@ export class AuthService {
       };
     }
 
-
-    // Caso: usuario NO existe 
+    // Caso: usuario NO existe
     try {
       const user = await this.prisma.user.create({
         data: {
@@ -116,11 +115,11 @@ export class AuthService {
         },
       });
 
-      try {
-        await this.emailService.sendWelcomeEmail(user.name, user.email);
-      } catch (err) {
-        console.error('Error enviando correo de bienvenida Google:', err);
-      }
+      // try {
+      //   await this.emailService.sendWelcomeEmail(user.name, user.email);
+      // } catch (err) {
+      //   console.error('Error enviando correo de bienvenida Google:', err);
+      // }
 
       const token = await this.authLib.generateToken(user);
       this.authLib.addCookie(res, token);
@@ -161,20 +160,20 @@ export class AuthService {
         data: {
           name: dto.name,
           email: dto.email,
-          passwordHash,   
+          passwordHash,
           avatarUrl: dto.avatarUrl,
           isActive: true,
         },
       });
 
-      try {
-        await this.emailService.sendWelcomeEmail(
-          reactivatedUser.name,
-          reactivatedUser.email,
-        );
-      } catch (err) {
-        console.error('Error enviando correo de bienvenida (reactivado):', err);
-      }
+      // try {
+      //   await this.emailService.sendWelcomeEmail(
+      //     reactivatedUser.name,
+      //     reactivatedUser.email,
+      //   );
+      // } catch (err) {
+      //   console.error('Error enviando correo de bienvenida (reactivado):', err);
+      // }
 
       return {
         status: 'success',
@@ -188,20 +187,20 @@ export class AuthService {
       data: {
         name: dto.name,
         email: dto.email,
-        passwordHash,    
+        passwordHash,
         avatarUrl: dto.avatarUrl,
         isActive: true,
       },
     });
 
-    try {
-      await this.emailService.sendWelcomeEmail(
-        newUser.name,
-        newUser.email,
-      );
-    } catch (err) {
-      console.error('Error enviando correo de bienvenida (nuevo):', err);
-    }
+    // try {
+    //   await this.emailService.sendWelcomeEmail(
+    //     newUser.name,
+    //     newUser.email,
+    //   );
+    // } catch (err) {
+    //   console.error('Error enviando correo de bienvenida (nuevo):', err);
+    // }
 
     return {
       status: 'success',
@@ -211,7 +210,9 @@ export class AuthService {
   }
 
   async forgotPassword(dto: ForgotPasswordDto) {
-    const user = await this.prisma.user.findUnique({ where: { email: dto.email } });
+    const user = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+    });
     if (!user) return { message: 'If that email exists, we sent instructions' };
 
     // Generar token seguro
@@ -226,7 +227,7 @@ export class AuthService {
       },
     });
 
-    await this.emailService.sendPasswordResetEmail(user.email, token);
+    // await this.emailService.sendPasswordResetEmail(user.email, token);
 
     return { message: 'We sent instructions to your email account' };
   }
