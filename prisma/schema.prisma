@@ -109,13 +109,14 @@ model CompanySettings {
 }
 
 model UserCompany {
-  id        String  @id @default(uuid())
+  id        String    @id @default(uuid())
   userId    String
   companyId String
   role      Role
+  createdAt DateTime  @default(now())
   
-  company   Company @relation(fields: [companyId], references: [id])
-  user      User    @relation(fields: [userId], references: [id])
+  company   Company   @relation(fields: [companyId], references: [id])
+  user      User      @relation(fields: [userId], references: [id])
 
   @@unique([userId, companyId])
 }
@@ -127,6 +128,7 @@ model Category {
   id        String     @id @default(uuid())
   companyId String
   name      String
+  createdAt DateTime   @default(now())
   company   Company    @relation(fields: [companyId], references: [id])
   products  Product[]
   suppliers Supplier[]
@@ -135,17 +137,18 @@ model Category {
 }
 
 model Product {
-  id          String  @id @default(uuid())
+  id          String    @id @default(uuid())
   name        String
   sku         String
   barcode     String?
   description String?
   price       Float
   cost        Float?
-  qty         Int     @default(0) // stock actual, no negativo
+  qty         Int       @default(0) // stock actual, no negativo
+  createdAt   DateTime  @default(now())
+  deletedAt   DateTime? // Soft delete
   categoryId  String?
   companyId   String
-  deletedAt   DateTime? // Soft delete
 
   company     Company   @relation(fields: [companyId], references: [id])
   category    Category? @relation(fields: [categoryId], references: [id])
@@ -177,11 +180,12 @@ model File {
 }
 
 model CompanySupplier {
-  id         String   @id @default(uuid())
+  id         String     @id @default(uuid())
   companyId  String
   supplierId String
-  Company    Company  @relation(fields: [companyId], references: [id])
-  Supplier   Supplier @relation(fields: [supplierId], references: [id])
+  createdAt  DateTime   @default(now())
+  Company    Company    @relation(fields: [companyId], references: [id])
+  Supplier   Supplier   @relation(fields: [supplierId], references: [id])
 
   @@unique([companyId, supplierId])
 }
@@ -225,6 +229,7 @@ model Customer {
   memberSince DateTime @default(now())
   notes       String?
   companyId   String
+  createdAt   DateTime @default(now())
   company     Company  @relation(fields: [companyId], references: [id])
   invoices    Invoice[]
 }
