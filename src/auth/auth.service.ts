@@ -52,6 +52,12 @@ export class AuthService {
     try {
       const token = await this.authLib.generateToken(result.user);
       this.authLib.addCookie(res, token);
+
+      // Obtener datos de admin si existe
+      const adminData = await this.prisma.admin.findUnique({
+        where: { userId: result.user.id },
+      });
+
       return {
         token: token,
         user: {
@@ -66,6 +72,10 @@ export class AuthService {
             name: result.company?.name,
             subscriptionStatus: result.company?.subscriptionStatus,
           },
+          // Datos de admin
+          isAdmin: !!adminData,
+          adminRole: adminData?.role || null,
+          adminDepartment: adminData?.department || null,
         },
       };
     } catch (error) {
@@ -89,6 +99,11 @@ export class AuthService {
       const token = await this.authLib.generateToken(result.user);
       this.authLib.addCookie(res, token);
 
+      // Obtener datos de admin si existe
+      const adminData = await this.prisma.admin.findUnique({
+        where: { userId: result.user.id },
+      });
+
       return {
         token: token,
         user: {
@@ -96,10 +111,15 @@ export class AuthService {
           name: result.user.name,
           email: result.user.email,
           avatarUrl: result.user.avatarUrl,
+          role: result.role,
           company: {
             id: result.company?.id,
             name: result.company?.name,
           },
+          // Datos de admin
+          isAdmin: !!adminData,
+          adminRole: adminData?.role || null,
+          adminDepartment: adminData?.department || null,
         },
       };
     }
@@ -131,7 +151,12 @@ export class AuthService {
           name: user.name,
           email: user.email,
           avatarUrl: user.avatarUrl,
+          role: 'EMPLOYEE', // rol por defecto para nuevos usuarios
           company: {},
+          // Datos de admin (nuevo usuario no es admin)
+          isAdmin: false,
+          adminRole: null,
+          adminDepartment: null,
         },
       };
     } catch (error) {
