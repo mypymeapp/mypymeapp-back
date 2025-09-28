@@ -7,6 +7,7 @@ import { CategorySeed } from './category.seed';
 import { ProductSeed } from './product.seed';
 import { SupplierSeed } from './supplier.seed';
 import { CustomerSeed } from './customer.seed';
+import { AdminSeed } from './admin.seed';
 
 @Injectable()
 export class SeedService implements OnModuleInit {
@@ -29,6 +30,10 @@ export class SeedService implements OnModuleInit {
     await supplierSeed.run();
     const customerSeed = new CustomerSeed(this.prisma);
     await customerSeed.run();
+    
+    // Seeds para el sistema de soporte
+    const adminSeed = new AdminSeed(this.prisma);
+    await adminSeed.run();
   }
 }
 

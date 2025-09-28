@@ -19,6 +19,7 @@ model User {
   isActive          Boolean             @default(true)
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @default(now()) @updatedAt
+  deletedAt         DateTime?           // Soft delete - fecha de eliminación
 
   emailVerification EmailVerification[]
   oauth             OAuthAccount[]
@@ -28,6 +29,7 @@ model User {
   transactions      Transaction[]
   tickets           Ticket[]
   ticketMessages    TicketMessage[]
+  admin             Admin?              // Relación opcional con Admin
 }
 
 model Session {
@@ -315,7 +317,6 @@ enum Role {
   OWNER
   EMPLOYEE
   ADMIN
-  SUPERADMIN
 }
 
 enum TransactionType {
@@ -422,12 +423,13 @@ model TicketMessage {
 
 model Admin {
   id                String              @id @default(uuid())
-  email             String              @unique
-  name              String
+  userId            String              @unique // Relación con User
   role              AdminRole           @default(SUPPORT)
   department        Department          @default(TECNICO)
+  isActive          Boolean             @default(true)
   
   // Relaciones
+  user              User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   assignedTickets   Ticket[]
   messages          TicketMessage[]
   
