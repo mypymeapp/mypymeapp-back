@@ -22,7 +22,7 @@ import { Role } from '@prisma/client';
 import { UpdateUserDto } from './dto/updateUser.dto';
 import { ChangeRoleDto } from './dto/changeRole.dto';
 import { EditUserDto } from './dto/editUser.dto';
-import { ResetPasswordDto } from './dto/resetPassword.dto';
+import { AdminResetPasswordDto } from './dto/resetPassword.dto';
 //import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 //import { RolesGuard } from 'src/auth/guards/roles.guard';
 //import { Roles } from 'src/auth/guards/roles.decorator';
@@ -172,7 +172,7 @@ export class UsersController {
   // @Roles(Role.SUPER_ADMIN)
   resetPassword(
     @Param('id', ParseUUIDPipe) id: string,
-    @Body() dto: ResetPasswordDto,
+    @Body() dto: AdminResetPasswordDto,
   ) {
     return this.usersService.resetPassword(id, dto);
   }
