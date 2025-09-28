@@ -37,15 +37,15 @@ export class SupportController {
   // ==================================
   @Post('tickets')
   async createTicket(@Request() req: RequestWithUser, @Body() createTicketDto: CreateTicketDto) {
-    // Usar un ID de usuario fijo para testing - TEMPORAL
-    const userId = req.user?.sub || 'test-user-id';
+    // Usar ID del usuario test para testing - TEMPORAL
+    const userId = req.user?.sub || '8841ba78-4ac4-4db1-a9b9-2b5c28b1b219';
     return this.supportService.createTicket(userId, createTicketDto);
   }
 
   @Get('my-tickets')
   async getMyTickets(@Request() req: RequestWithUser, @Query() query: TicketQueryDto) {
-    // Usar un ID de usuario fijo para testing - TEMPORAL
-    const userId = req.user?.sub || 'test-user-id';
+    // Usar ID del usuario test para testing - TEMPORAL
+    const userId = req.user?.sub || '8841ba78-4ac4-4db1-a9b9-2b5c28b1b219';
     return this.supportService.getUserTickets(userId, query);
   }
 
@@ -65,8 +65,8 @@ export class SupportController {
     const ticket = await this.supportService.findTicketById(id);
     
     // Para testing, usar addAdminMessage por defecto
-    const userId = req.user?.sub || 'test-admin-id';
-    return this.supportService.addAdminMessage(id, userId, createMessageDto);
+    const adminId = req.user?.sub || 'd69c050d-5c84-4bf6-b058-b914d7948930';
+    return this.supportService.addAdminMessage(id, adminId, createMessageDto);
   }
 
   @Get('tickets/:id/messages')
@@ -85,7 +85,7 @@ export class SupportController {
 
   @Get('admin/my-assigned')
   async getMyAssignedTickets(@Request() req: RequestWithUser, @Query() query: TicketQueryDto) {
-    const adminId = req.user?.sub || 'test-admin-id';
+    const adminId = req.user?.sub || 'd69c050d-5c84-4bf6-b058-b914d7948930';
     return this.supportService.getAdminTickets(adminId, query);
   }
 
@@ -117,7 +117,7 @@ export class SupportController {
     @Request() req: RequestWithUser,
     @Body() createMessageDto: CreateMessageDto
   ) {
-    const adminId = req.user?.sub || 'test-admin-id';
+    const adminId = req.user?.sub || 'd69c050d-5c84-4bf6-b058-b914d7948930';
     return this.supportService.addAdminMessage(id, adminId, createMessageDto);
   }
 
