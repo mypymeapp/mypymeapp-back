@@ -9,7 +9,7 @@ import { Role } from '@prisma/client';
 import { UpdateUserDto } from './dto/updateUser.dto';
 import { ChangeRoleDto } from './dto/changeRole.dto';
 import { EditUserDto } from './dto/editUser.dto';
-import { ResetPasswordDto } from './dto/resetPassword.dto';
+import { AdminResetPasswordDto } from './dto/resetPassword.dto';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -450,7 +450,7 @@ export class UsersService {
   }
 
   /** Reset de contraseña a una temporal */
-  async resetPassword(id: string, dto: ResetPasswordDto) {
+  async resetPassword(id: string, dto: AdminResetPasswordDto) {
     // Verificar que el usuario existe
     const existingUser = await this.prisma.user.findUnique({
       where: { id }
