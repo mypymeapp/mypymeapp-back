@@ -62,11 +62,15 @@ export class CronReportsService {
             <p><b>Ventas:</b> ${sales.length} transacciones (${sales.reduce((acc, s) => acc + s.amount, 0) / 100} ${sales[0]?.currency ?? ''})</p>
         `;
 
-      // try {
-      //     await this.emailService.sendEmail(company.mail, `Resumen diario ${company.name}`, html);
-      // } catch (err) {
-      //     console.error(`Error enviando reporte a ${company.name}:`, err);
-      // }
+      try {
+        await this.emailService.sendEmail(
+          company.mail,
+          `Resumen diario ${company.name}`,
+          html,
+        );
+      } catch (err) {
+        console.error(`Error enviando reporte a ${company.name}:`, err);
+      }
     }
   }
 

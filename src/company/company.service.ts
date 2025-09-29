@@ -87,15 +87,15 @@ export class CompanyService {
       return company;
     });
 
-    // try {
-    //   const recipientEmail = result.mail || user.email; // si no hay mail de empresa, usa el del usuario
-    //   const recipientName = result.mail ? result.name : user.name;
+    try {
+      const recipientEmail = result.mail || user.email; // si no hay mail de empresa, usa el del usuario
+      const recipientName = result.mail ? result.name : user.name;
 
-    //   await this.emailService.sendWelcomeEmail(recipientName, recipientEmail);
-    // } catch (error) {
-    //   console.error('Error enviando mail de bienvenida:', error.message);
-    //   // no lanzamos excepción para no romper el flujo de creación
-    // }
+      await this.emailService.sendWelcomeEmail(recipientName, recipientEmail);
+    } catch (error) {
+      console.error('Error enviando mail de bienvenida:', error.message);
+      // no lanzamos excepción para no romper el flujo de creación
+    }
     return result;
   }
 
