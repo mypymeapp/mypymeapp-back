@@ -21,6 +21,8 @@ import { UsersService } from './users.service';
 import { Role } from '@prisma/client';
 import { UpdateUserDto } from './dto/updateUser.dto';
 import { ChangeRoleDto } from './dto/changeRole.dto';
+import { EditUserDto } from './dto/editUser.dto';
+import { AdminResetPasswordDto } from './dto/resetPassword.dto';
 //import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 //import { RolesGuard } from 'src/auth/guards/roles.guard';
 //import { Roles } from 'src/auth/guards/roles.decorator';
@@ -54,6 +56,41 @@ export class UsersController {
   // @Roles(Role.SUPERADMIN)
   getAllUsers(@Query('companyId') companyId?: string) {
     return this.usersService.getAllUsers(companyId);
+  }
+
+  @ApiOperation({ summary: 'Create new user from admin panel' })
+  @Post()
+  // @Roles(Role.SUPER_ADMIN)
+  createUser(@Body() dto: any) {
+    return this.usersService.createUser(dto);
+  }
+
+  @ApiOperation({ summary: 'Get all deleted users for admin panel' })
+  @Get('deleted')
+  // @Roles(Role.SUPER_ADMIN)
+  getDeletedUsers() {
+    return this.usersService.getDeletedUsers();
+  }
+
+  @ApiOperation({ summary: 'Get all users with admin information for admin panel' })
+  @Get('admin/list')
+  // @Roles(Role.SUPER_ADMIN)
+  getUsersForAdmin() {
+    return this.usersService.getUsersForAdmin();
+  }
+
+  @ApiOperation({ summary: 'Get all clients (non-admin users) with their companies' })
+  @Get('clients')
+  // @Roles(Role.SUPER_ADMIN)
+  getAllClients() {
+    return this.usersService.getAllClients();
+  }
+
+  @ApiOperation({ summary: 'Create new client with company' })
+  @Post('clients')
+  // @Roles(Role.SUPER_ADMIN)
+  createClient(@Body() dto: any) {
+    return this.usersService.createClient(dto);
   }
 
   @ApiOperation({ summary: 'Get user info passing user id as a parameter' })
@@ -99,12 +136,6 @@ export class UsersController {
       ...result,
     };
   }
-  @ApiOperation({ summary: 'Delete a user by passing the id as a parameter' })
-  @Delete(':id')
-  // @Roles(Role.OWNER)
-  deleteUser(@Param('id', ParseUUIDPipe) id: string) {
-    return this.usersService.deleteUser(id);
-  }
 
   @ApiOperation({ summary: 'Get companies associated with a user' })
   @Get(':id/companies')
@@ -125,5 +156,40 @@ export class UsersController {
     const currentUserRole = Role.OWNER;
     return this.usersService.changeRole(id, companyId, dto, currentUserRole);
   }
+
+  @ApiOperation({ summary: 'Edit user information and admin status' })
+  @Patch(':id/edit')
+  // @Roles(Role.SUPER_ADMIN)
+  editUser(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: EditUserDto,
+  ) {
+    return this.usersService.editUser(id, dto);
+  }
+
+  @ApiOperation({ summary: 'Reset user password to temporary password' })
+  @Post(':id/reset-password')
+  // @Roles(Role.SUPER_ADMIN)
+  resetPassword(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: AdminResetPasswordDto,
+  ) {
+    return this.usersService.resetPassword(id, dto);
+  }
+
+  @ApiOperation({ summary: 'Soft delete user - marks as deleted without removing data' })
+  @Delete(':id')
+  // @Roles(Role.SUPER_ADMIN)
+  softDeleteUser(@Param('id', ParseUUIDPipe) id: string) {
+    return this.usersService.softDeleteUser(id);
+  }
+
+  @ApiOperation({ summary: 'Restore soft deleted user' })
+  @Post(':id/restore')
+  // @Roles(Role.SUPER_ADMIN)
+  restoreUser(@Param('id', ParseUUIDPipe) id: string) {
+    return this.usersService.restoreUser(id);
+  }
+
 }
 

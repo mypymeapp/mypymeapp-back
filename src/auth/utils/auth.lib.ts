@@ -49,17 +49,29 @@ export class AuthLib {
     const user = await this.prisma.user.findUnique({
       where: { email: data.email },
       include: {
-        companies: true,
+        companies: {
+          include: {
+            company: true, // Incluye la información de la compañía
+          },
+        },
       },
     });
-    let company: Company | null = null;
-    if (user?.companies?.length && user.companies.length > 0) {
-      company = await this.prisma.company.findUnique({
-        where: { id: user.companies[0].companyId },
-      });
+
+    // Si no se encuentra el usuario, devuelve null
+    if (!user) {
+      return { user: null, role: null, company: null };
     }
 
-    return { user, company };
+    // Verifica si el usuario tiene una compañía asociada
+    if (user.companies.length > 0) {
+      const userCompany = user.companies[0];
+      const role = userCompany.role;
+      const company = userCompany.company;
+      return { user, role, company };
+    }
+
+    // Si el usuario existe pero no tiene compañías, devuelve solo el usuario
+    return { user, role: null, company: null };
   }
 
   async comparePassword(password: string, hash: string) {

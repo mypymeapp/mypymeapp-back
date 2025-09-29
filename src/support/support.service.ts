@@ -25,13 +25,28 @@ export class SupportService {
           select: { id: true, name: true, email: true }
         },
         assignedAdmin: {
-          select: { id: true, name: true, email: true, department: true }
+          select: { 
+            id: true, 
+            role: true, 
+            department: true,
+            user: {
+              select: { id: true, name: true, email: true }
+            }
+          }
         },
         messages: {
           orderBy: { createdAt: 'asc' },
           include: {
             user: { select: { id: true, name: true } },
-            admin: { select: { id: true, name: true } }
+            admin: { 
+              select: { 
+                id: true, 
+                role: true,
+                user: {
+                  select: { id: true, name: true }
+                }
+              }
+            }
           }
         }
       }
@@ -55,7 +70,10 @@ export class SupportService {
       endDate
     } = query;
 
-    const skip = (page - 1) * limit;
+    // Convertir page y limit a números enteros
+    const pageNum = parseInt(page.toString(), 10) || 1;
+    const limitNum = parseInt(limit.toString(), 10) || 10;
+    const skip = (pageNum - 1) * limitNum;
     
     const where: any = {};
 
@@ -83,20 +101,35 @@ export class SupportService {
       this.prisma.ticket.findMany({
         where,
         skip,
-        take: limit,
+        take: limitNum,
         orderBy: { [sortBy]: sortOrder },
         include: {
           user: {
             select: { id: true, name: true, email: true }
           },
           assignedAdmin: {
-            select: { id: true, name: true, email: true, department: true }
+            select: { 
+            id: true, 
+            role: true, 
+            department: true,
+            user: {
+              select: { id: true, name: true, email: true }
+            }
+          }
           },
           messages: {
             orderBy: { createdAt: 'asc' },
             include: {
               user: { select: { id: true, name: true } },
-              admin: { select: { id: true, name: true } }
+              admin: { 
+              select: { 
+                id: true, 
+                role: true,
+                user: {
+                  select: { id: true, name: true }
+                }
+              }
+            }
             }
           }
         }
@@ -107,10 +140,10 @@ export class SupportService {
     return {
       tickets,
       pagination: {
-        page,
-        limit,
+        page: pageNum,
+        limit: limitNum,
         total,
-        totalPages: Math.ceil(total / limit)
+        totalPages: Math.ceil(total / limitNum)
       }
     };
   }
@@ -124,13 +157,28 @@ export class SupportService {
           select: { id: true, name: true, email: true }
         },
         assignedAdmin: {
-          select: { id: true, name: true, email: true, department: true }
+          select: { 
+            id: true, 
+            role: true, 
+            department: true,
+            user: {
+              select: { id: true, name: true, email: true }
+            }
+          }
         },
         messages: {
           orderBy: { createdAt: 'asc' },
           include: {
             user: { select: { id: true, name: true } },
-            admin: { select: { id: true, name: true } }
+            admin: { 
+              select: { 
+                id: true, 
+                role: true,
+                user: {
+                  select: { id: true, name: true }
+                }
+              }
+            }
           }
         }
       }
@@ -155,13 +203,28 @@ export class SupportService {
           select: { id: true, name: true, email: true }
         },
         assignedAdmin: {
-          select: { id: true, name: true, email: true, department: true }
+          select: { 
+            id: true, 
+            role: true, 
+            department: true,
+            user: {
+              select: { id: true, name: true, email: true }
+            }
+          }
         },
         messages: {
           orderBy: { createdAt: 'asc' },
           include: {
             user: { select: { id: true, name: true } },
-            admin: { select: { id: true, name: true } }
+            admin: { 
+              select: { 
+                id: true, 
+                role: true,
+                user: {
+                  select: { id: true, name: true }
+                }
+              }
+            }
           }
         }
       }
@@ -207,13 +270,28 @@ export class SupportService {
           select: { id: true, name: true, email: true }
         },
         assignedAdmin: {
-          select: { id: true, name: true, email: true, department: true }
+          select: { 
+            id: true, 
+            role: true, 
+            department: true,
+            user: {
+              select: { id: true, name: true, email: true }
+            }
+          }
         },
         messages: {
           orderBy: { createdAt: 'asc' },
           include: {
             user: { select: { id: true, name: true } },
-            admin: { select: { id: true, name: true } }
+            admin: { 
+              select: { 
+                id: true, 
+                role: true,
+                user: {
+                  select: { id: true, name: true }
+                }
+              }
+            }
           }
         }
       }
@@ -238,7 +316,15 @@ export class SupportService {
       },
       include: {
         user: { select: { id: true, name: true } },
-        admin: { select: { id: true, name: true } }
+        admin: { 
+              select: { 
+                id: true, 
+                role: true,
+                user: {
+                  select: { id: true, name: true }
+                }
+              }
+            }
       }
     });
   }
@@ -256,7 +342,15 @@ export class SupportService {
       },
       include: {
         user: { select: { id: true, name: true } },
-        admin: { select: { id: true, name: true } }
+        admin: { 
+              select: { 
+                id: true, 
+                role: true,
+                user: {
+                  select: { id: true, name: true }
+                }
+              }
+            }
       }
     });
   }
@@ -270,7 +364,15 @@ export class SupportService {
       orderBy: { createdAt: 'asc' },
       include: {
         user: { select: { id: true, name: true } },
-        admin: { select: { id: true, name: true } }
+        admin: { 
+              select: { 
+                id: true, 
+                role: true,
+                user: {
+                  select: { id: true, name: true }
+                }
+              }
+            }
       }
     });
   }
