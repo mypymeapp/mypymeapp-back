@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { EmailService } from 'src/mail/mail.service';
 import { startOfDay, endOfDay } from 'date-fns';
+import { dailyReportTemplate } from 'src/templates/dailyReport.template';
 
 @Injectable()
 export class CronReportsService {
@@ -14,13 +15,25 @@ export class CronReportsService {
     const companies = await this.prisma.company.findMany();
 
     for (const company of companies) {
-      if (!company.mail || !company.mail.includes('@')) {
-        console.warn(`Correo inválido para company ${company.name}`);
-        continue;
-      }
+      // if (!company.mail || !company.mail.includes('@')) {
+      //   console.warn(`Correo inválido para company ${company.name}`);
+      //   continue;
+      // }
+
+       // ✅ lista de correos "de prueba" o específicas
+      const recipients = [
+        'gilerme1980@gmail.com',
+        'alvaropaggi@gmail.com',
+        'dantzalazar@gmail.com',
+        'federicocurto00@gmail.com',
+        'kruslan55569@gmail.com',
+        'essamdev@gmail.com',
+        'pmo.martinez@gmail.com',
+      ];
 
       const today = new Date();
 
+       // 👥 Miembros nuevos
       const newMembers = await this.prisma.userCompany.findMany({
         where: {
           companyId: company.id,
@@ -28,21 +41,27 @@ export class CronReportsService {
         },
         include: { user: true },
       });
+      const membersNames = newMembers.map((m) => m.user.name);
 
+      // 📂 Categorías nuevas
       const newCategories = await this.prisma.category.findMany({
         where: {
           companyId: company.id,
           createdAt: { gte: startOfDay(today), lte: endOfDay(today) },
         },
       });
+      const categoriesNames = newCategories.map((c) => c.name);
 
+      // 📦 Productos nuevos
       const newProducts = await this.prisma.product.findMany({
         where: {
           companyId: company.id,
           createdAt: { gte: startOfDay(today), lte: endOfDay(today) },
         },
       });
+      const productsNames = newProducts.map((p) => p.name);
 
+      // 💰 Ventas del día
       const sales = await this.prisma.transaction.findMany({
         where: {
           companyId: company.id,
@@ -50,24 +69,66 @@ export class CronReportsService {
           createdAt: { gte: startOfDay(today), lte: endOfDay(today) },
         },
       });
+      const totalSales = sales.reduce((acc, s) => acc + s.amount, 0) / 100;
+      const currency = sales[0]?.currency ?? '';
 
-      const html = `
-            <h2>Resumen diario - ${company.name}</h2>
-            <p><b>Miembros nuevos:</b> ${newMembers.length}</p>
-            <p><b>Categorías nuevas:</b> ${newCategories.map((c) => c.name).join(', ')}</p>
-            <p><b>Productos nuevos:</b></p>
-            <ul>
-            ${newProducts.map((p) => `<li>${p.name} - $${p.price} (stock: ${p.qty})</li>`).join('')}
-            </ul>
-            <p><b>Ventas:</b> ${sales.length} transacciones (${sales.reduce((acc, s) => acc + s.amount, 0) / 100} ${sales[0]?.currency ?? ''})</p>
-        `;
+      // 🧑‍🤝‍🧑 Clientes nuevos
+      const customers = await this.prisma.customer.findMany({
+        where: {
+          companyId: company.id,
+          createdAt: { gte: startOfDay(today), lte: endOfDay(today) },
+        },
+      });
+
+      // 🧾 Facturas emitidas
+      const invoices = await this.prisma.invoice.findMany({
+        where: {
+          companyId: company.id,
+          issuedAt: { gte: startOfDay(today), lte: endOfDay(today) },
+        },
+      });
+
+      // ⚠️ Productos con stock bajo
+      const lowStock = await this.prisma.product.findMany({
+        where: { companyId: company.id, qty: { lt: 5 } },
+        take: 5,
+      });
+
+      // 📝 HTML unificado
+      const html = dailyReportTemplate(
+        membersNames,
+        categoriesNames,
+        productsNames,
+        sales.length,
+        totalSales,
+        currency,
+        invoices.length,
+        customers.length,
+        lowStock
+      ) + `
+        <div class="content">
+          <h2>💰 Ventas del día</h2>
+          <p>${sales.length} transacciones (Total: ${totalSales} ${currency})</p>
+
+          <h2>🧾 Facturas emitidas</h2>
+          <p>${invoices.length}</p>
+
+          <h2>🧑‍🤝‍🧑 Clientes nuevos</h2>
+          <p>${customers.length}</p>
+
+          <h2>⚠️ Productos con stock bajo (&lt; 5)</h2>
+          <ul>${lowStock.map(p => `<li>${p.name} - Stock: ${p.qty}</li>`).join('') || '<li>Ninguno</li>'}</ul>
+        </div>
+      `;
 
       try {
-        await this.emailService.sendEmail(
-          company.mail,
-          `Resumen diario ${company.name}`,
-          html,
-        );
+        for (const email of recipients) {
+          await this.emailService.sendEmail(
+            email,
+            `📊 Resumen diario ${company.name}`,
+            html,
+          );
+        }
       } catch (err) {
         console.error(`Error enviando reporte a ${company.name}:`, err);
       }
@@ -75,28 +136,41 @@ export class CronReportsService {
   }
 
   async sendTestEmail() {
-    const today = new Date();
+    // Datos de prueba
+    const membersNames = ['Juan Pérez', 'Ana López', 'Carlos Gómez'];
+    const categoriesNames = ['Decoraciones', 'Tecnología', 'Abrigos'];
+    const productsNames = ['iPhone 17', 'Collar', 'Producto 8'];
 
-    // Datos mock o primeros registros de tu DB
-    const newMembers = await this.prisma.userCompany.findMany({ take: 3 });
-    const newCategories = await this.prisma.category.findMany({ take: 3 });
-    const newProducts = await this.prisma.product.findMany({ take: 3 });
+    const salesCount = 5;
+    const totalSales = 1250.75;
+    const currency = 'USD';
+    const invoicesCount = 3;
+    const customersCount = 2;
+    const lowStock = [
+      { name: 'Laptop', qty: 3 },
+      { name: 'Monitor', qty: 4 },
+    ];
 
-    const html = `
-        <h2>Prueba de envío de correo - MyPymeApp</h2>
-        <p><b>Miembros nuevos:</b> ${newMembers.map((m) => m.userId).join(', ')}</p>
-        <p><b>Categorías nuevas:</b> ${newCategories.map((c) => c.name).join(', ')}</p>
-        <p><b>Productos nuevos:</b> ${newProducts.map((p) => p.name).join(', ')}</p>
-        `;
+    // 📝 HTML completo usando el template unificado
+    const html = dailyReportTemplate(
+      membersNames,
+      categoriesNames,
+      productsNames,
+      salesCount,
+      totalSales,
+      currency,
+      invoicesCount,
+      customersCount,
+      lowStock
+    );
 
-    // Tu correo personal
     const myEmail = 'gilerme1980@gmail.com';
 
     try {
       const info = await this.emailService.sendEmail(
         myEmail,
-        'Prueba de correo MyPymeApp',
-        html,
+        '📧 Test Daily Report MyPymeApp',
+        html, // Ahora contiene todo el reporte en un solo bloque
       );
       return info;
     } catch (err) {
@@ -105,4 +179,3 @@ export class CronReportsService {
     }
   }
 }
-
