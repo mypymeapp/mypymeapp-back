@@ -11,3 +11,7 @@ import { EmailService } from '../../mail/mail.service';
     providers: [StripeService, PrismaService, JwtService, EmailService],
 })
 export class StripeModule {}
+
+
+
+
