@@ -18,3 +18,6 @@ export class CronReportsController {
         return this.reportsService.sendTestEmail();
     }
 }
+
+
+

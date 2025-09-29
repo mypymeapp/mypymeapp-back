@@ -132,11 +132,11 @@ export class StripeService {
             const validUntil = (subscriptionEndDate ??
               updatedCompany.subscriptionEndDate)!;
 
-            // await this.emailService.sendEmail(
-            // user.email,
-            // '¡Gracias por tu suscripción!',
-            // subscriptionActivatedTemplate(user.name, updatedCompany.name, validUntil.toLocaleDateString()),
-            // );
+            await this.emailService.sendEmail(
+            user.email,
+            '¡Gracias por tu suscripción!',
+            subscriptionActivatedTemplate(user.name, updatedCompany.name, validUntil.toLocaleDateString()),
+            );
           }
           break;
         }
@@ -217,11 +217,11 @@ export class StripeService {
                 updatedCompany.subscriptionEndDate?.toLocaleDateString() ??
                 'N/A';
 
-              // await this.emailService.sendEmail(
-              // user.email,
-              // 'Factura de suscripción pagada',
-              // subscriptionInvoiceTemplate(user.name ?? '', invoice.amount_paid / 100, invoice.currency, validUntil),
-              // );
+              await this.emailService.sendEmail(
+              user.email,
+              'Factura de suscripción pagada',
+              subscriptionInvoiceTemplate(user.name ?? '', invoice.amount_paid / 100, invoice.currency, validUntil),
+              );
             }
           }
           break;

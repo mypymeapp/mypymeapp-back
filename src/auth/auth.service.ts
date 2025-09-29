@@ -135,11 +135,11 @@ export class AuthService {
         },
       });
 
-      // try {
-      //   await this.emailService.sendWelcomeEmail(user.name, user.email);
-      // } catch (err) {
-      //   console.error('Error enviando correo de bienvenida Google:', err);
-      // }
+      try {
+        await this.emailService.sendWelcomeEmail(user.name, user.email);
+      } catch (err) {
+        console.error('Error enviando correo de bienvenida Google:', err);
+      }
 
       const token = await this.authLib.generateToken(user);
       this.authLib.addCookie(res, token);
@@ -191,14 +191,14 @@ export class AuthService {
         },
       });
 
-      // try {
-      //   await this.emailService.sendWelcomeEmail(
-      //     reactivatedUser.name,
-      //     reactivatedUser.email,
-      //   );
-      // } catch (err) {
-      //   console.error('Error enviando correo de bienvenida (reactivado):', err);
-      // }
+      try {
+        await this.emailService.sendWelcomeEmail(
+          reactivatedUser.name,
+          reactivatedUser.email,
+        );
+      } catch (err) {
+        console.error('Error enviando correo de bienvenida (reactivado):', err);
+      }
 
       return {
         status: 'success',
@@ -218,14 +218,14 @@ export class AuthService {
       },
     });
 
-    // try {
-    //   await this.emailService.sendWelcomeEmail(
-    //     newUser.name,
-    //     newUser.email,
-    //   );
-    // } catch (err) {
-    //   console.error('Error enviando correo de bienvenida (nuevo):', err);
-    // }
+    try {
+      await this.emailService.sendWelcomeEmail(
+        newUser.name,
+        newUser.email,
+      );
+    } catch (err) {
+      console.error('Error enviando correo de bienvenida (nuevo):', err);
+    }
 
     return {
       status: 'success',
@@ -252,7 +252,7 @@ export class AuthService {
       },
     });
 
-    // await this.emailService.sendPasswordResetEmail(user.email, token);
+    await this.emailService.sendPasswordResetEmail(user.email, token);
 
     return { message: 'We sent instructions to your email account' };
   }
