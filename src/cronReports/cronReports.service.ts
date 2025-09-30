@@ -24,11 +24,11 @@ export class CronReportsService {
       const recipients = [
         'gilerme1980@gmail.com',
         'alvaropaggi@gmail.com',
-        'dantzalazar@gmail.com',
-        'federicocurto00@gmail.com',
-        'kruslan55569@gmail.com',
-        'essamdev@gmail.com',
-        'pmo.martinez@gmail.com',
+        // 'dantzalazar@gmail.com',
+        // 'federicocurto00@gmail.com',
+        // 'kruslan55569@gmail.com',
+        // 'essamdev@gmail.com',
+        // 'pmo.martinez@gmail.com',
       ];
 
       const today = new Date();
