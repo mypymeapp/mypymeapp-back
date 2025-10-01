@@ -108,8 +108,13 @@ export class UserSeed {
       return;
     }
 
-    // Definimos los usuarios (5, uno por cada company)
+    // Definimos los usuarios (6, uno será super admin y 5 para las companies)
     const usersData = [
+      {
+        name: 'Super Admin',
+        email: 'sadmin@test.com',
+        password: 'Admin123!',
+      },
       {
         name: 'John Smith',
         email: 'john.smith@example.com',
@@ -139,30 +144,46 @@ export class UserSeed {
 
     for (let i = 0; i < usersData.length; i++) {
       const user = usersData[i];
-      const company = companies[i]; // asignamos 1 user -> 1 company en orden
-
       const hashedPassword = await bcrypt.hash(user.password, 10);
 
-      const createdUser = await this.prisma.user.create({
-        data: {
-          name: user.name,
-          email: user.email,
-          passwordHash: hashedPassword,
-          companies: {
-            create: {
-              companyId: company.id,
-              role: Role.OWNER, // puedes cambiar por EMPLOYEE si quieres
+      // El primer usuario (Super Admin) no se asocia a ninguna compañía
+      if (i === 0) {
+        const createdUser = await this.prisma.user.create({
+          data: {
+            name: user.name,
+            email: user.email,
+            passwordHash: hashedPassword,
+          },
+        });
+
+        console.log(
+          `👤 Super Admin '${createdUser.name}' created (no company association)`,
+        );
+      } else {
+        // Los demás usuarios se asocian a las compañías
+        const company = companies[i - 1]; // ajustamos el índice porque el primer usuario no tiene compañía
+
+        const createdUser = await this.prisma.user.create({
+          data: {
+            name: user.name,
+            email: user.email,
+            passwordHash: hashedPassword,
+            companies: {
+              create: {
+                companyId: company.id,
+                role: Role.OWNER,
+              },
             },
           },
-        },
-      });
+        });
 
-      console.log(
-        `👤 User '${createdUser.name}' created and asociated to company '${company.name}'`,
-      );
+        console.log(
+          `👤 User '${createdUser.name}' created and asociated to company '${company.name}'`,
+        );
+      }
     }
 
-    console.log('✅ Seed of 5 users created y asociated to 5 companies.');
+    console.log('✅ Seed of 6 users created (1 Super Admin + 5 company users).');
   }
 }
 
