@@ -2,15 +2,10 @@
 import { Injectable, ForbiddenException } from '@nestjs/common';
 import Stripe from 'stripe';
 import { PrismaService } from '../../../prisma/prisma.service';
-import { Currency, SubscriptionStatus } from '@prisma/client';
+import { Currency } from '@prisma/client';
 import { EmailService } from '../../mail/mail.service';
 import { subscriptionInvoiceTemplate } from 'src/templates/subscriptionInvoiceTemplate';
 import { subscriptionActivatedTemplate } from 'src/templates/subscriptionActivatedTemplate';
-
-// 1. Extiende Stripe.Invoice
-interface InvoiceWithSubscription extends Stripe.Invoice {
-  subscription?: string | Stripe.Subscription | null;
-}
 
 @Injectable()
 export class StripeService {
@@ -63,6 +58,7 @@ export class StripeService {
   async handleWebhook(rawBody: Buffer, sig: string) {
     let event: Stripe.Event;
 
+    // 1️⃣ Verificar firma Stripe
     try {
       event = this.stripe.webhooks.constructEvent(
         rawBody,
@@ -70,12 +66,16 @@ export class StripeService {
         process.env.STRIPE_WEBHOOK_SECRET!,
       );
     } catch (err: any) {
-      console.error('Error construyendo evento Stripe:', err.message);
-      throw new Error(`Webhook signature verification failed: ${err.message}`);
+      console.error('[STRIPE WEBHOOK] Signature verification failed:', err.message);
+      return { received: true }; // Evitar que Stripe reintente con error 500
     }
 
+    // 2️⃣ Procesar evento de manera segura
     try {
+      console.log(`[STRIPE WEBHOOK] Procesando evento: ${event.type}, id: ${event.id}`);
+
       switch (event.type) {
+
         /** Checkout completado */
         case 'checkout.session.completed': {
           const session = event.data.object as Stripe.Checkout.Session;
@@ -83,61 +83,66 @@ export class StripeService {
           const companyId = metadata.companyId;
           const userId = metadata.userId;
 
-          if (companyId && userId) {
-            await this.prisma.transaction.updateMany({
-              where: { providerRef: session.id },
-              data: {
-                status: 'SUCCESS',
-                amount: session.amount_total ?? 0,
-                currency: (session.currency ?? 'USD').toUpperCase() as Currency,
-              },
-            });
+          if (!companyId || !userId) break; // No hay datos críticos
 
-            let subscriptionEndDate: Date | null = null;
-            const subscriptionId =
-              (session.subscription as string) || undefined;
-            if (subscriptionId) {
-              try {
-                const subscriptionResponse =
-                  await this.stripe.subscriptions.retrieve(subscriptionId);
-                const subscription = subscriptionResponse as any;
-                if (subscription.current_period_end) {
-                  subscriptionEndDate = new Date(
-                    subscription.current_period_end * 1000,
-                  );
-                }
-              } catch (err) {
-                console.warn(
-                  `No se pudo obtener current_period_end de Stripe: ${err}`,
+          // 2a. Actualizar transacción
+          await this.prisma.transaction.updateMany({
+            where: { providerRef: session.id },
+            data: {
+              status: 'SUCCESS',
+              amount: session.amount_total ?? 0,
+              currency: (session.currency ?? 'USD').toUpperCase() as Currency,
+            },
+          });
+
+          // 2b. Obtener fecha de suscripción desde Stripe
+          let subscriptionEndDate: Date | null = null;
+          const subscriptionId = (session.subscription as string) || undefined;
+
+          if (subscriptionId) {
+            try {
+              const subscription = await this.stripe.subscriptions.retrieve(subscriptionId);
+              if ((subscription as any).current_period_end) {
+                subscriptionEndDate = new Date(
+                  (subscription as any).current_period_end * 1000
                 );
               }
+            } catch (err) {
+              console.warn('[STRIPE] No se pudo obtener current_period_end:', err);
             }
-
-            const updatedCompany = await this.prisma.company.update({
-              where: { id: companyId },
-              data: {
-                subscriptionStatus: 'PREMIUM',
-                subscriptionEndDate:
-                  subscriptionEndDate ??
-                  new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-              },
-            });
-
-            const user = await this.prisma.user.findUnique({
-              where: { id: userId },
-            });
-            if (!user)
-              throw new Error(`Usuario con id ${userId} no encontrado`);
-
-            const validUntil = (subscriptionEndDate ??
-              updatedCompany.subscriptionEndDate)!;
-
-            // await this.emailService.sendEmail(
-            // user.email,
-            // '¡Gracias por tu suscripción!',
-            // subscriptionActivatedTemplate(user.name, updatedCompany.name, validUntil.toLocaleDateString()),
-            // );
           }
+
+          // 2c. Actualizar compañía
+          const updatedCompany = await this.prisma.company.update({
+            where: { id: companyId },
+            data: {
+              subscriptionStatus: 'PREMIUM',
+              subscriptionEndDate:
+                subscriptionEndDate ?? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+            },
+          }).catch(err => {
+            console.warn(`[PRISMA ERROR] Compañía ${companyId} no encontrada: ${err.message}`);
+            return null;
+          });
+
+          if (!updatedCompany) break;
+
+          // 2d. Obtener usuario
+          const user = await this.prisma.user.findUnique({ where: { id: userId } });
+          if (!user) break;
+
+          // 2e. Enviar email (aislado)
+          try {
+            const validUntil = subscriptionEndDate ?? updatedCompany.subscriptionEndDate!;
+            await this.emailService.sendEmail(
+              user.email,
+              '¡Gracias por tu suscripción!',
+              subscriptionActivatedTemplate(user.name, updatedCompany.name, validUntil.toLocaleDateString()),
+            );
+          } catch (emailErr) {
+            console.error('[EMAIL ERROR] Activación (Checkout):', emailErr);
+          }
+
           break;
         }
 
@@ -145,96 +150,102 @@ export class StripeService {
         case 'invoice.paid': {
           const invoice = event.data.object as Stripe.Invoice;
           let metadata = invoice.metadata || {};
+          const subscriptionId = (invoice as any).subscription as string | undefined;
 
-          const subscriptionId = (invoice as any).subscription as
-            | string
-            | undefined;
+          // Intentar metadata de la suscripción si no existe
           if ((!metadata.userId || !metadata.companyId) && subscriptionId) {
             try {
-              const subscriptionResponse =
-                await this.stripe.subscriptions.retrieve(subscriptionId);
-              const subscription = subscriptionResponse as any;
+              const subscription = await this.stripe.subscriptions.retrieve(subscriptionId);
               metadata = subscription.metadata || {};
             } catch (err) {
-              console.warn(
-                `No se pudo obtener metadata desde la suscripción: ${err}`,
-              );
+              console.warn('[STRIPE] No se pudo obtener metadata de la suscripción:', err);
             }
           }
 
           const userId = metadata.userId;
           const companyId = metadata.companyId;
 
-          if (userId && companyId) {
-            await this.prisma.transaction.create({
-              data: {
-                userId,
-                companyId,
-                type: 'SUBSCRIPTION',
-                amount: invoice.amount_paid,
-                currency: invoice.currency.toUpperCase() as Currency,
-                status: 'SUCCESS',
-                provider: 'STRIPE',
-                providerRef: invoice.id,
-              },
-            });
+          if (!userId || !companyId) break; // Datos críticos faltantes
 
-            let subscriptionEndDate: Date | null = null;
-            if (subscriptionId) {
-              try {
-                const subscriptionResponse =
-                  await this.stripe.subscriptions.retrieve(subscriptionId);
-                const subscription = subscriptionResponse as any;
-                if (subscription.current_period_end) {
-                  subscriptionEndDate = new Date(
-                    subscription.current_period_end * 1000,
-                  );
-                }
-              } catch (err) {
-                console.warn(
-                  `No se pudo obtener current_period_end de Stripe: ${err}`,
-                );
+          // 1. Crear transacción
+          await this.prisma.transaction.create({
+            data: {
+              userId,
+              companyId,
+              type: 'SUBSCRIPTION',
+              amount: invoice.amount_paid,
+              currency: invoice.currency.toUpperCase() as Currency,
+              status: 'SUCCESS',
+              provider: 'STRIPE',
+              providerRef: invoice.id,
+            },
+          });
+
+          // 2. Obtener fecha de suscripción
+          let subscriptionEndDate: Date | null = null;
+          if (subscriptionId) {
+            try {
+              const subscription = await this.stripe.subscriptions.retrieve(subscriptionId);
+              if ((subscription as any).current_period_end) {
+                subscriptionEndDate = new Date((subscription as any).current_period_end * 1000);
               }
-            }
-
-            const updatedCompany = await this.prisma.company.update({
-              where: { id: companyId },
-              data: {
-                subscriptionStatus: 'PREMIUM',
-                subscriptionEndDate:
-                  subscriptionEndDate ??
-                  new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-              },
-            });
-
-            const user = await this.prisma.user.findUnique({
-              where: { id: userId },
-            });
-
-            if (user) {
-              const validUntil =
-                subscriptionEndDate?.toLocaleDateString() ??
-                updatedCompany.subscriptionEndDate?.toLocaleDateString() ??
-                'N/A';
-
-              // await this.emailService.sendEmail(
-              // user.email,
-              // 'Factura de suscripción pagada',
-              // subscriptionInvoiceTemplate(user.name ?? '', invoice.amount_paid / 100, invoice.currency, validUntil),
-              // );
+            } catch (err) {
+              console.warn('[STRIPE] No se pudo obtener current_period_end:', err);
             }
           }
+
+          // 3. Actualizar compañía
+          const updatedCompany = await this.prisma.company.update({
+            where: { id: companyId },
+            data: {
+              subscriptionStatus: 'PREMIUM',
+              subscriptionEndDate:
+                subscriptionEndDate ?? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+            },
+          }).catch(err => {
+            console.warn(`[PRISMA ERROR] Compañía ${companyId} no encontrada: ${err.message}`);
+            return null;
+          });
+
+          if (!updatedCompany) break;
+
+          // 4. Obtener usuario
+          const user = await this.prisma.user.findUnique({ where: { id: userId } });
+          if (!user) break;
+
+          // 5. Enviar email de factura (aislado)
+          try {
+            const validUntil =
+              subscriptionEndDate?.toLocaleDateString() ??
+              updatedCompany.subscriptionEndDate?.toLocaleDateString() ??
+              'N/A';
+
+            await this.emailService.sendEmail(
+              user.email,
+              'Factura de suscripción pagada',
+              subscriptionInvoiceTemplate(
+                user.name ?? '',
+                invoice.amount_paid / 100,
+                invoice.currency,
+                validUntil
+              ),
+            );
+          } catch (emailErr) {
+            console.error('[EMAIL ERROR] Invoice Paid:', emailErr);
+          }
+
           break;
         }
 
         default:
-          console.log(`Evento no manejado: ${event.type}`);
+          console.log(`[STRIPE] Evento no manejado: ${event.type}`);
       }
 
       return { received: true };
     } catch (err) {
-      console.error('Error procesando webhook:', err);
-      throw new Error('Error procesando webhook');
+      // ❌ Nunca lanzar a Stripe, solo loguear
+      console.error('[STRIPE WEBHOOK ERROR] Error procesando evento:', err);
+      return { received: true };
     }
   }
 
@@ -244,14 +255,8 @@ export class StripeService {
       where: { userId },
       orderBy: { createdAt: 'desc' },
       include: {
-        user: {
-          select: {
-            name: true,
-            email: true,
-          },
-        },
+        user: { select: { name: true, email: true } },
       },
     });
   }
 }
-

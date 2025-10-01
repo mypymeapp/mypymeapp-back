@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Post } from '@nestjs/common';
 import { CronReportsService } from './cronReports.service';
 
 @Controller('cron')
@@ -7,14 +7,17 @@ export class CronReportsController {
         console.log('✅ CronReportsController cargado');
     }
 
-    @Get('daily-report')
+    @Post('daily-report')
     async dailyReport() {
         return this.reportsService.sendDailyReports();
     }
 
-    @Get('test-email')
+    @Post('test-email')
     async testEmail() {
         console.log('✅ Entrando a /cron/test-email');
         return this.reportsService.sendTestEmail();
     }
 }
+
+
+
