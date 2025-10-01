@@ -40,7 +40,7 @@ import { CronReportsModule } from './cronReports/cronReports.module';
     AiModule,
     CompanyMembersModule,
     SupportModule,
-    // CronReportsModule
+    CronReportsModule
   ],
   controllers: [AppController],
   providers: [AppService, SeedService],
