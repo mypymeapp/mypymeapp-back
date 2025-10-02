@@ -115,6 +115,7 @@ export class AuthService {
           company: {
             id: result.company?.id,
             name: result.company?.name,
+            subscriptionStatus: result.company?.subscriptionStatus,
           },
           // Datos de admin
           isAdmin: !!adminData,
@@ -152,7 +153,11 @@ export class AuthService {
           email: user.email,
           avatarUrl: user.avatarUrl,
           role: 'EMPLOYEE', // rol por defecto para nuevos usuarios
-          company: {},
+          company: {
+            id: null,
+            name: null,
+            subscriptionStatus: 'FREE',
+          },
           // Datos de admin (nuevo usuario no es admin)
           isAdmin: false,
           adminRole: null,
