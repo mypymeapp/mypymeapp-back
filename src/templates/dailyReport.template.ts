@@ -1,4 +1,5 @@
 export const dailyReportTemplate = (
+    companyName: string,
     members: string[],
     categories: string[],
     products: string[],
@@ -6,8 +7,9 @@ export const dailyReportTemplate = (
     totalSales: number,
     currency: string,
     invoicesCount: number,
-    customersCount: number,
+    customers: string[],
     lowStock: { name: string; qty: number }[],
+    suppliers: { name: string; category: string }[], // 👈 ahora objetos con categoría
 ) => `
 <!DOCTYPE html>
 <html lang="es">
@@ -26,30 +28,33 @@ export const dailyReportTemplate = (
     <div class="container">
         <div class="header">
         <img src="https://res.cloudinary.com/dnoakcx0v/image/upload/v1758124300/logo-dark_wt62ll.png" height="60" />
-        <h1>Resumen Diario</h1>
+        <h1>📊 Resumen Diario - ${companyName}</h1>
         </div>
 
         <div class="content">
-        <h2>Miembros nuevos</h2>
+        <h2>🧑‍🤝‍🧑 Nuevos miembros</h2>
         <ul>${members.map(m => `<li>${m}</li>`).join('') || '<li>Ninguno</li>'}</ul>
 
-        <h2>Categorías nuevas</h2>
+        <h2>📂 Categorías nuevas</h2>
         <ul>${categories.map(c => `<li>${c}</li>`).join('') || '<li>Ninguna</li>'}</ul>
 
-        <h2>Productos nuevos</h2>
+        <h2>📦 Nuevos productos</h2>
         <ul>${products.map(p => `<li>${p}</li>`).join('') || '<li>Ninguno</li>'}</ul>
 
         <h2>💰 Ventas del día</h2>
-        <p>${salesCount} transacciones (Total: ${totalSales} ${currency})</p>
+        <p>${salesCount} transacciones (Total: ${totalSales.toFixed(2)} ${currency || ''})</p>
 
         <h2>🧾 Facturas emitidas</h2>
         <p>${invoicesCount}</p>
 
-        <h2>🧑‍🤝‍🧑 Clientes nuevos</h2>
-        <p>${customersCount}</p>
+        <h2>🧑‍💼 Clientes nuevos</h2>
+        <ul>${customers.map(c => `<li>${c}</li>`).join('') || '<li>Ninguno</li>'}</ul>
 
         <h2>⚠️ Productos con stock bajo (&lt; 5)</h2>
         <ul>${lowStock.map(p => `<li>${p.name} - Stock: ${p.qty}</li>`).join('') || '<li>Ninguno</li>'}</ul>
+
+        <h2>🏭 Proveedores nuevos</h2>
+        <ul>${suppliers.map(s => `<li>${s.name} (Categoría: ${s.category})</li>`).join('') || '<li>Ninguno</li>'}</ul>
         </div>
 
         <div class="footer">
