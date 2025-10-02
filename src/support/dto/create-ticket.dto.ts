@@ -29,4 +29,8 @@ export class CreateTicketDto {
   @IsString()
   @IsOptional()
   clientCompany?: string;
+
+  @IsString()
+  @IsOptional()
+  userEmail?: string; // Email del usuario autenticado (viene de NextAuth)
 }

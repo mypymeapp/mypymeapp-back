@@ -54,4 +54,8 @@ export class TicketQueryDto {
   @IsOptional()
   @IsString()
   endDate?: string;
+
+  @IsOptional()
+  @IsString()
+  userEmail?: string; // Email del usuario para filtrar sus tickets
 }

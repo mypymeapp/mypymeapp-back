@@ -10,14 +10,34 @@ import { Ticket, TicketMessage, Priority, Status, Department } from '@prisma/cli
 export class SupportService {
   constructor(private prisma: PrismaService) {}
 
+  // Buscar usuario por email
+  async findUserByEmail(email: string) {
+    return this.prisma.user.findUnique({
+      where: { email },
+      select: { id: true, name: true, email: true }
+    });
+  }
+
+  // Buscar admin por userId
+  async findAdminByUserId(userId: string) {
+    return this.prisma.admin.findUnique({
+      where: { userId },
+      select: { id: true, role: true, department: true }
+    });
+  }
+
   // Crear un nuevo ticket
   async createTicket(userId: string, createTicketDto: CreateTicketDto): Promise<Ticket> {
+    // Extraer solo los campos que existen en el modelo Ticket
+    const { title, description, priority, department } = createTicketDto;
+    
     return this.prisma.ticket.create({
       data: {
-        ...createTicketDto,
+        title,
+        description,
         userId,
-        priority: createTicketDto.priority || Priority.MEDIA,
-        department: createTicketDto.department || Department.TECNICO,
+        priority: priority || Priority.MEDIA,
+        department: department || Department.TECNICO,
         status: Status.ABIERTO,
       },
       include: {
@@ -48,6 +68,9 @@ export class SupportService {
               }
             }
           }
+        },
+        _count: {
+          select: { messages: true }
         }
       }
     });
@@ -131,6 +154,9 @@ export class SupportService {
               }
             }
             }
+          },
+          _count: {
+            select: { messages: true }
           }
         }
       }),

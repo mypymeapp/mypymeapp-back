@@ -8,4 +8,8 @@ export class CreateMessageDto {
   @IsBoolean()
   @IsOptional()
   isFromUser?: boolean;
+
+  @IsString()
+  @IsOptional()
+  userEmail?: string; // Email del usuario autenticado (viene de NextAuth)
 }
