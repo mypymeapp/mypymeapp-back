@@ -151,7 +151,10 @@ export class UsersService {
     const clients = await this.prisma.user.findMany({
       where: {
         deletedAt: null, // Solo usuarios no eliminados
-        admin: null // Solo usuarios que NO son admin
+        admin: null, // Solo usuarios que NO son admin
+        companies: {
+          some: {} // Solo usuarios que tienen al menos una empresa
+        }
       },
       include: {
         companies: {
@@ -179,6 +182,77 @@ export class UsersService {
         }
       },
       orderBy: { createdAt: 'desc' }
+    });
+
+    // Transformar datos para el frontend
+    return clients.map(client => ({
+      id: client.id,
+      name: client.name,
+      email: client.email,
+      avatarUrl: client.avatarUrl,
+      isActive: client.isActive,
+      createdAt: client.createdAt.toISOString(),
+      updatedAt: client.updatedAt.toISOString(),
+      deletedAt: client.deletedAt?.toISOString() || null,
+      companies: client.companies.map(userCompany => ({
+        id: userCompany.id,
+        role: userCompany.role,
+        createdAt: userCompany.createdAt.toISOString(),
+        company: {
+          id: userCompany.company.id,
+          name: userCompany.company.name,
+          mail: userCompany.company.mail,
+          pais: userCompany.company.pais,
+          razonSocial: userCompany.company.razonSocial,
+          rubroPrincipal: userCompany.company.rubroPrincipal,
+          rut_Cuit: userCompany.company.rut_Cuit,
+          subscriptionStatus: userCompany.company.subscriptionStatus,
+          subscriptionEndDate: userCompany.company.subscriptionEndDate?.toISOString() || null,
+          createdAt: userCompany.company.createdAt.toISOString(),
+          logoFileId: userCompany.company.logoFileId,
+          _count: userCompany.company._count
+        }
+      })),
+      _count: client._count
+    }));
+  }
+
+  /** Obtener clientes eliminados (para administración) */
+  async getDeletedClients() {
+    const clients = await this.prisma.user.findMany({
+      where: {
+        deletedAt: { not: null }, // Solo usuarios eliminados
+        admin: null, // Solo usuarios que NO son admin
+        companies: {
+          some: {} // Solo usuarios que tienen al menos una empresa
+        }
+      },
+      include: {
+        companies: {
+          include: {
+            company: {
+              include: {
+                _count: {
+                  select: {
+                    members: true,
+                    products: true,
+                    customers: true,
+                    transactions: true
+                  }
+                }
+              }
+            }
+          }
+        },
+        _count: {
+          select: {
+            companies: true,
+            transactions: true,
+            tickets: true
+          }
+        }
+      },
+      orderBy: { deletedAt: 'desc' }
     });
 
     // Transformar datos para el frontend
@@ -482,7 +556,7 @@ export class UsersService {
   }
 
   /** Crear nuevo usuario desde panel de administración */
-  async createUser(dto: any) {
+  async createUser(dto: any, currentUserAdminRole?: string) {
     const { name, email, password, isAdmin, adminRole, adminDepartment } = dto;
 
     // Verificar si el usuario ya existe
@@ -492,6 +566,11 @@ export class UsersService {
 
     if (existingUser) {
       throw new BadRequestException('El email ya está en uso');
+    }
+
+    // Validar que solo SUPER_ADMIN pueda crear usuarios administradores
+    if (isAdmin && currentUserAdminRole !== 'SUPER_ADMIN') {
+      throw new ForbiddenException('Solo los Super Administradores pueden crear usuarios administradores');
     }
 
     // Hash de la contraseña

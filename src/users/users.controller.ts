@@ -8,6 +8,7 @@ import {
   Body,
   Query,
   ParseUUIDPipe,
+  Request,
   // UseGuards,
   ParseFilePipe,
   MaxFileSizeValidator,
@@ -17,6 +18,7 @@ import {
   UseGuards,
   BadRequestException,
 } from '@nestjs/common';
+import { Request as ExpressRequest } from 'express';
 import { UsersService } from './users.service';
 import { Role } from '@prisma/client';
 import { UpdateUserDto } from './dto/updateUser.dto';
@@ -34,6 +36,18 @@ import {
 } from '@nestjs/swagger';
 import { FilesService } from 'src/files/files.service';
 import { FileInterceptor } from '@nestjs/platform-express/multer/interceptors';
+
+// Interfaz para el Request con usuario autenticado
+interface RequestWithUser extends ExpressRequest {
+  user?: {
+    sub: string;
+    email: string;
+    role?: string;
+    adminRole?: string;
+    iat?: number;
+    exp?: number;
+  };
+}
 
 @ApiTags('Users')
 @Controller('users')
@@ -61,8 +75,11 @@ export class UsersController {
   @ApiOperation({ summary: 'Create new user from admin panel' })
   @Post()
   // @Roles(Role.SUPER_ADMIN)
-  createUser(@Body() dto: any) {
-    return this.usersService.createUser(dto);
+  async createUser(@Request() req: RequestWithUser, @Body() dto: any) {
+    // Obtener el rol del admin actual desde el token JWT
+    // Si no hay usuario autenticado, usar SUPER_ADMIN por defecto para testing
+    const currentUserAdminRole = req.user?.adminRole || 'SUPER_ADMIN';
+    return this.usersService.createUser(dto, currentUserAdminRole);
   }
 
   @ApiOperation({ summary: 'Get all deleted users for admin panel' })
@@ -84,6 +101,13 @@ export class UsersController {
   // @Roles(Role.SUPER_ADMIN)
   getAllClients() {
     return this.usersService.getAllClients();
+  }
+
+  @ApiOperation({ summary: 'Get all deleted clients for admin panel' })
+  @Get('clients/deleted')
+  // @Roles(Role.SUPER_ADMIN)
+  getDeletedClients() {
+    return this.usersService.getDeletedClients();
   }
 
   @ApiOperation({ summary: 'Create new client with company' })
